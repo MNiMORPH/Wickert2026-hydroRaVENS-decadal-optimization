@@ -216,3 +216,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Dakota output directories and large output files
+*/out/
+dakota.dat
+dakota.out
+dakota.rst
+dakota_results.h5
+LHS_*.out
+fort.13

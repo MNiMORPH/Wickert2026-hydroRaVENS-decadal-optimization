@@ -1,0 +1,81 @@
+# Dakota input file: hydroRaVENS Cannon River parameter calibration
+#
+# Objective: maximize Nash-Sutcliffe Efficiency (NSE) for streamflow.
+#            Dakota minimizes, so the driver returns (1 - NSE).
+#
+# Method: hybrid sequential
+#   1. EGO  – Efficient Global Optimization (Bayesian, global search)
+#   2. PS   – Pattern Search (derivative-free, local refinement)
+#
+# Parameters:
+#   log__t_efold_shallow   log10 of shallow-reservoir e-folding time [days]
+#   log__t_efold_deep      log10 of deep-reservoir e-folding time [days]
+#   f_exfiltration_shallow fraction of shallow exfiltration going to stream
+#   PDD_melt_factor        degree-day snowmelt rate [mm SWE / degC / day]
+#
+# Run from cannon_river/:
+#   dakota -i dakota.in -o dakota.out
+
+environment
+  top_method_pointer = 'HYBRID'
+  tabular_data
+    tabular_data_file = 'dakota.dat'
+
+method
+  id_method = 'HYBRID'
+  hybrid sequential
+    method_pointer_list = 'EGO' 'PS'
+
+method
+  id_method = 'EGO'
+  efficient_global
+    gaussian_process surfpack
+    initial_samples = 200
+    seed = 12345
+    output quiet
+  model_pointer = 'M1'
+
+method
+  id_method = 'PS'
+  coliny_pattern_search
+    max_function_evaluations = 500
+    convergence_tolerance = 1.0e-6
+    output quiet
+  model_pointer = 'M1'
+
+model
+  id_model = 'M1'
+  single
+    interface_pointer = 'I1'
+  variables_pointer = 'V1'
+  responses_pointer = 'R1'
+
+variables
+  id_variables = 'V1'
+  continuous_design = 4
+    descriptors   = 'log__t_efold_shallow' 'log__t_efold_deep' 'f_exfiltration_shallow' 'PDD_melt_factor'
+    lower_bounds  =  0.3   2.0  0.01   0.1
+    upper_bounds  =  3.0   4.7  0.99  10.0
+    initial_point =  1.2   3.3  0.80   1.0
+
+interface
+  id_interface = 'I1'
+  analysis_driver = 'bash run_driver.sh'
+  fork
+    parameters_file = 'params.in'
+    results_file    = 'results.out'
+    work_directory
+      named 'out/run'
+      directory_tag
+      directory_save
+    file_save
+    copy_files 'driver.py' 'cannon_cfg_template.yml' 'CannonTestInput.csv' 'run_driver.sh'
+    asynchronous
+      evaluation_concurrency = 4
+
+responses
+  id_responses = 'R1'
+  objective_functions = 1
+    response_descriptors = 'neg_nse'
+  no_gradients
+  no_hessians
