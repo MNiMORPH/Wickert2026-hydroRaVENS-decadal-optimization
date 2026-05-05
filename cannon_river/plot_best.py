@@ -14,10 +14,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import hydroravens
+from hydroravens import run_and_score
 
-SPIN_UP_CYCLES = 3
-CFG_TEMPLATE   = 'cannon_cfg_template.yml'
+CFG_TEMPLATE = 'cannon_cfg_template.yml'
 
 
 def read_best_params(dat_file):
@@ -30,16 +29,13 @@ def read_best_params(dat_file):
 
 
 def run_model(params):
-    b = hydroravens.Buckets()
-    b.initialize(CFG_TEMPLATE)
-    b.reservoirs[0].t_efold        = 10 ** params['log__t_efold_shallow']
-    b.reservoirs[1].t_efold        = 10 ** params['log__t_efold_deep']
-    b.reservoirs[0].f_to_discharge = params['f_exfiltration_shallow']
-    b.snowpack.melt_factor         = params['PDD_melt_factor']
-    for _ in range(SPIN_UP_CYCLES):
-        b.run()
-        b._timestep_i = b.hydrodata.index[0]
-    b.run()
+    _, b = run_and_score(
+        CFG_TEMPLATE,
+        t_efold        = [10 ** params['log__t_efold_shallow'],
+                          10 ** params['log__t_efold_deep']],
+        f_to_discharge = [params['f_exfiltration_shallow']],
+        melt_factor    =  params['PDD_melt_factor'],
+    )
     return b
 
 
