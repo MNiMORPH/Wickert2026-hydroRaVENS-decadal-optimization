@@ -1,7 +1,7 @@
 # Dakota input file: hydroRaVENS Cannon River parameter calibration
 #
-# Objective: maximize Nash-Sutcliffe Efficiency (NSE) for streamflow.
-#            Dakota minimizes, so the driver returns (1 - NSE).
+# Objective: maximize Kling-Gupta Efficiency (KGE) for streamflow.
+#            Dakota minimizes, so the driver returns (1 - KGE).
 #
 # Method: hybrid sequential
 #   1. EGO  – Efficient Global Optimization (Bayesian, global search)
@@ -76,6 +76,6 @@ interface
 responses
   id_responses = 'R1'
   objective_functions = 1
-    response_descriptors = 'neg_nse'
+    response_descriptors = 'neg_kge'
   no_gradients
   no_hessians

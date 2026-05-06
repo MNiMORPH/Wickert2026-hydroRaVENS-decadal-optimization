@@ -15,8 +15,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from hydroravens import run_and_score
+from hydroravens.calibration import _nse
 
-CFG_TEMPLATE = 'cannon_cfg_template.yml'
+CFG_TEMPLATE   = 'cannon_cfg_template.yml'
+OBJECTIVE_COL  = 'neg_kge'   # column in dakota.dat that was minimized
 
 
 def read_best_params(dat_file):
@@ -25,22 +27,31 @@ def read_best_params(dat_file):
     except FileNotFoundError:
         sys.exit(f'Error: {dat_file} not found. Run Dakota first.')
     df = df.rename(columns={'%eval_id': 'eval_id'})
-    return df.loc[df['neg_nse'].idxmin()]
+    return df.loc[df[OBJECTIVE_COL].idxmin()]
 
 
 def run_model(params):
-    _, b = run_and_score(
+    kge, b = run_and_score(
         CFG_TEMPLATE,
         t_efold        = [10 ** params['log__t_efold_shallow'],
                           10 ** params['log__t_efold_deep']],
         f_to_discharge = [params['f_exfiltration_shallow']],
         melt_factor    =  params['PDD_melt_factor'],
+        metric='KGE',
     )
-    return b
+    return kge, b
 
 
-def make_plot(b, params, save_path):
-    nse = b.computeNSE(return_nse=True, verbose=False)
+def make_plot(b, params, kge, save_path):
+    # Also compute NSE for comparison
+    q_mod = np.asarray(b.hydrodata['Specific Discharge (modeled) [mm/day]'].dropna())
+    q_obs = np.asarray(b.hydrodata['Specific Discharge [mm/day]'].dropna())
+    # align lengths in case of any NA mismatch
+    mask = (b.hydrodata['Specific Discharge (modeled) [mm/day]'].notna()
+            & b.hydrodata['Specific Discharge [mm/day]'].notna())
+    q_mod = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge (modeled) [mm/day]'])
+    q_obs = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge [mm/day]'])
+    nse = _nse(q_mod, q_obs)
 
     fig, (ax_p, ax_q) = plt.subplots(
         2, 1, figsize=(12, 7), sharex=True,
@@ -70,11 +81,11 @@ def make_plot(b, params, save_path):
     ax_q.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
     plt.setp(ax_q.get_xticklabels(), rotation=30, ha='right')
 
-    # Parameter + NSE annotation
+    # Parameter + metric annotation
     t_shallow = 10 ** params['log__t_efold_shallow']
     t_deep    = 10 ** params['log__t_efold_deep']
     ann = (
-        f'NSE = {nse:.3f}\n'
+        f'KGE = {kge:.3f}   NSE = {nse:.3f}\n'
         f'$\\tau_{{shallow}}$ = {t_shallow:.1f} d\n'
         f'$\\tau_{{deep}}$ = {t_deep:.0f} d\n'
         f'$f_{{exfilt}}$ = {params["f_exfiltration_shallow"]:.3f}\n'
@@ -103,11 +114,11 @@ if __name__ == '__main__':
     t_shallow = 10 ** best['log__t_efold_shallow']
     t_deep    = 10 ** best['log__t_efold_deep']
     print(f'\nBest evaluation: {int(best["eval_id"])}')
-    print(f'  NSE             = {1 - best["neg_nse"]:.4f}')
+    print(f'  KGE             = {1 - best[OBJECTIVE_COL]:.4f}')
     print(f'  t_efold_shallow = {t_shallow:.1f} days')
     print(f'  t_efold_deep    = {t_deep:.0f} days')
     print(f'  f_exfiltration  = {best["f_exfiltration_shallow"]:.4f}')
     print(f'  PDD_melt_factor = {best["PDD_melt_factor"]:.4f} mm/°C/day')
 
-    b = run_model(best)
-    make_plot(b, best, save_path=args.save)
+    kge, b = run_model(best)
+    make_plot(b, best, kge=kge, save_path=args.save)
