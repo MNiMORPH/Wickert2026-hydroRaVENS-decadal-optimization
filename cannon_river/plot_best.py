@@ -31,7 +31,7 @@ def read_best_params(dat_file):
 
 
 def run_model(params):
-    kge, b = run_and_score(
+    kge, aic, b = run_and_score(
         CFG_TEMPLATE,
         t_efold        = [10 ** params['log__t_efold_shallow'],
                           10 ** params['log__t_efold_deep']],
@@ -39,10 +39,10 @@ def run_model(params):
         melt_factor    =  params['PDD_melt_factor'],
         metric='KGE',
     )
-    return kge, b
+    return kge, aic, b
 
 
-def make_plot(b, params, kge, save_path):
+def make_plot(b, params, kge, aic, save_path):
     # Also compute NSE for comparison
     q_mod = np.asarray(b.hydrodata['Specific Discharge (modeled) [mm/day]'].dropna())
     q_obs = np.asarray(b.hydrodata['Specific Discharge [mm/day]'].dropna())
@@ -85,7 +85,7 @@ def make_plot(b, params, kge, save_path):
     t_shallow = 10 ** params['log__t_efold_shallow']
     t_deep    = 10 ** params['log__t_efold_deep']
     ann = (
-        f'KGE = {kge:.3f}   NSE = {nse:.3f}\n'
+        f'KGE = {kge:.3f}   NSE = {nse:.3f}   AIC = {aic:.1f}\n'
         f'$\\tau_{{shallow}}$ = {t_shallow:.1f} d\n'
         f'$\\tau_{{deep}}$ = {t_deep:.0f} d\n'
         f'$f_{{exfilt}}$ = {params["f_exfiltration_shallow"]:.3f}\n'
@@ -120,5 +120,6 @@ if __name__ == '__main__':
     print(f'  f_exfiltration  = {best["f_exfiltration_shallow"]:.4f}')
     print(f'  PDD_melt_factor = {best["PDD_melt_factor"]:.4f} mm/°C/day')
 
-    kge, b = run_model(best)
-    make_plot(b, best, kge=kge, save_path=args.save)
+    kge, aic, b = run_model(best)
+    print(f'  AIC             = {aic:.2f}')
+    make_plot(b, best, kge=kge, aic=aic, save_path=args.save)

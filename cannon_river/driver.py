@@ -20,7 +20,7 @@ PENALTY = 2.0   # returned on model failure; safely above any real 1-KGE
 params, results = di.read_parameters_file()
 
 try:
-    score, _ = run_and_score(
+    score, aic, _ = run_and_score(
         'cannon_cfg_template.yml',
         t_efold        = [10 ** params['log__t_efold_shallow'],
                           10 ** params['log__t_efold_deep']],
