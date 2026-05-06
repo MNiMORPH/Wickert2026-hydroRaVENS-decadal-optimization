@@ -24,7 +24,7 @@ from hydroravens.calibration import _nse, _kge
 
 CFG_TEMPLATE  = 'cannon_cfg_template.yml'
 OBJECTIVE_COL = 'neg_kge'
-METRIC        = 'KGE'
+METRIC        = 'logKGE'
 ROUTING_N     = 2      # Nash-cascade shape; must match driver.py ROUTING_N
 
 
