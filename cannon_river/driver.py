@@ -26,8 +26,10 @@ try:
     result = run_and_score(
         'cannon_cfg_template.yml',
         t_efold        = [10 ** params['log__t_efold_shallow'],
-                          10 ** params['log__t_efold_deep']],
-        f_to_discharge = [params['f_exfiltration_shallow']],
+                          10 ** params['log__t_efold_soil'],
+                          10 ** params['log__t_efold_karst']],
+        f_to_discharge = [params['f_exfiltration_shallow'],
+                          params['f_exfiltration_soil']],
         melt_factor    =  params['PDD_melt_factor'],
         Hmax           = [10 ** params['log__Hmax_shallow']],
         routing_K      =  10 ** params['log__routing_K'],
