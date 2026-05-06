@@ -24,6 +24,8 @@ from hydroravens.calibration import _nse
 
 CFG_TEMPLATE  = 'cannon_cfg_template.yml'
 OBJECTIVE_COL = 'neg_kge'
+METRIC        = 'NSE'
+ROUTING_N     = 2      # Nash-cascade shape; must match driver.py ROUTING_N
 
 
 def read_best_params(dat_file):
@@ -45,21 +47,23 @@ def run_model(params):
                           10 ** params['log__t_efold_deep']],
         f_to_discharge = [params['f_exfiltration_shallow']],
         melt_factor    =  params['PDD_melt_factor'],
-        metric         = 'NSE',
+        Hmax           = [10 ** params['log__Hmax_shallow']],
+        routing_K      =  10 ** params['log__routing_K'],
+        routing_N      =  ROUTING_N,
+        metric         =  METRIC,
     )
 
 
-def make_plot(result, params, save_path):
-    b   = result.buckets
-    kge = result.score
-    aic = result.aic
+def make_plot(result, params, save_path, metric=METRIC):
+    b     = result.buckets
+    score = result.score
+    aic   = result.aic
 
-    # NSE for comparison
-    mask = (b.hydrodata['Specific Discharge (modeled) [mm/day]'].notna()
-            & b.hydrodata['Specific Discharge [mm/day]'].notna())
+    mask  = (b.hydrodata['Specific Discharge (modeled) [mm/day]'].notna()
+             & b.hydrodata['Specific Discharge [mm/day]'].notna())
     m_all = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge (modeled) [mm/day]'])
     o_all = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge [mm/day]'])
-    nse   = _nse(m_all, o_all)
+    nse   = _nse(m_all, o_all)   # always shown for reference
 
     dates = b.hydrodata['Date']
 
@@ -95,13 +99,19 @@ def make_plot(result, params, save_path):
     # Annotation box
     t_shallow = 10 ** params['log__t_efold_shallow']
     t_deep    = 10 ** params['log__t_efold_deep']
+    routing_K = 10 ** params['log__routing_K']
+    score_str = f'{metric} = {score:.3f}'
+    if metric != 'NSE':
+        score_str += f'   NSE = {nse:.3f}'
     ann = (
-        f'KGE = {kge:.3f}   NSE = {nse:.3f}   AIC = {aic:.1f}\n'
+        f'{score_str}   AIC = {aic:.1f}\n'
         f'BFI: obs = {result.bfi_obs:.3f},  mod = {result.bfi_mod:.3f}\n'
         f'$\\tau_{{shallow}}$ = {t_shallow:.1f} d,  '
         f'$\\tau_{{deep}}$ = {t_deep:.0f} d\n'
         f'$f_{{exfilt}}$ = {params["f_exfiltration_shallow"]:.3f},  '
-        f'PDD = {params["PDD_melt_factor"]:.2f} mm °C$^{{-1}}$ d$^{{-1}}$'
+        f'PDD = {params["PDD_melt_factor"]:.2f} mm °C$^{{-1}}$ d$^{{-1}}$\n'
+        f'$H_{{max}}$ = {10**params["log__Hmax_shallow"]:.0f} mm,  '
+        f'$K_{{route}}$ = {routing_K:.2f} d  (N={ROUTING_N})'
     )
     ax_q.text(0.02, 0.97, ann, transform=ax_q.transAxes,
               va='top', fontsize=8.5,
@@ -136,16 +146,20 @@ if __name__ == '__main__':
 
     t_shallow = 10 ** best['log__t_efold_shallow']
     t_deep    = 10 ** best['log__t_efold_deep']
+    routing_K = 10 ** best['log__routing_K']
     print(f'\nBest evaluation: {int(best["eval_id"])}')
-    print(f'  KGE             = {1 - best[OBJECTIVE_COL]:.4f}')
+    print(f'  {METRIC:<14}  = {1 - best[OBJECTIVE_COL]:.4f}')
     print(f'  t_efold_shallow = {t_shallow:.1f} days')
     print(f'  t_efold_deep    = {t_deep:.0f} days')
     print(f'  f_exfiltration  = {best["f_exfiltration_shallow"]:.4f}')
     print(f'  PDD_melt_factor = {best["PDD_melt_factor"]:.4f} mm/°C/day')
+    print(f'  Hmax_shallow    = {10**best["log__Hmax_shallow"]:.1f} mm')
+    print(f'  routing_K       = {routing_K:.3f} days  (N={ROUTING_N},'
+          f' mean travel time = {ROUTING_N * routing_K:.2f} days)')
 
     result = run_model(best)
     print(f'  AIC             = {result.aic:.2f}')
     print(f'  BFI obs         = {result.bfi_obs:.4f}')
     print(f'  BFI mod         = {result.bfi_mod:.4f}')
 
-    make_plot(result, best, save_path=args.save)
+    make_plot(result, best, save_path=args.save, metric=METRIC)

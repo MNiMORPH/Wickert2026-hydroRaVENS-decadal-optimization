@@ -2,7 +2,7 @@
 """
 Dakota driver for decade-by-decade hydroRaVENS calibration.
 
-Returns (1 - KGE) so Dakota minimization is equivalent to KGE maximization.
+Returns (1 - score) so Dakota minimisation is equivalent to metric maximisation.
 Set DECADE_START / DECADE_END to the scoring window.  For chained decades,
 pass initial_states from the previous decade and set SPIN_UP_CYCLES = 0.
 """
@@ -16,8 +16,9 @@ DECADE_END     = None
 METRIC         = 'NSE'
 SPIN_UP_CYCLES = 3
 INITIAL_STATES = None   # dict from a prior CalibResult.final_states, or None
+ROUTING_N      = 2      # Nash-cascade shape (fixed; increase to calibrate)
 
-PENALTY = 2.0   # returned on model failure; safely above any real 1-KGE
+PENALTY = 2.0   # returned on model failure; safely above any real 1 - score
 
 params, results = di.read_parameters_file()
 
@@ -29,6 +30,8 @@ try:
         f_to_discharge = [params['f_exfiltration_shallow']],
         melt_factor    =  params['PDD_melt_factor'],
         Hmax           = [10 ** params['log__Hmax_shallow']],
+        routing_K      =  10 ** params['log__routing_K'],
+        routing_N      =  ROUTING_N,
         initial_states = INITIAL_STATES,
         start          = DECADE_START,
         end            = DECADE_END,
