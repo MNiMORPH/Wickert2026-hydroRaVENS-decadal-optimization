@@ -32,6 +32,9 @@ def read_best_params(dat_file):
     except FileNotFoundError:
         sys.exit(f'Error: {dat_file} not found. Run Dakota first.')
     df = df.rename(columns={'%eval_id': 'eval_id'})
+    for col in df.columns:
+        if col != 'interface':
+            df[col] = pd.to_numeric(df[col], errors='coerce')
     return df.loc[df[OBJECTIVE_COL].idxmin()]
 
 
@@ -42,7 +45,7 @@ def run_model(params):
                           10 ** params['log__t_efold_deep']],
         f_to_discharge = [params['f_exfiltration_shallow']],
         melt_factor    =  params['PDD_melt_factor'],
-        metric         = 'KGE',
+        metric         = 'NSE',
     )
 
 
