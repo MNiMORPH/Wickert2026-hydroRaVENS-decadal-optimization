@@ -18,6 +18,11 @@
 #   PDD_melt_factor        degree-day snowmelt rate [mm SWE / degC / day]
 #   log__Hmax_shallow      log10 of shallow-reservoir max effective depth [mm]
 #                          (saturation-excess overland flow when exceeded)
+#   log__fdd_threshold     log10 of frozen-ground-index threshold [°C·day]
+#                          FGI accumulates freezing °C·days; when FGI exceeds
+#                          threshold, shallow→soil infiltration is blocked.
+#                          Molnau & Bissell (1983) West. Snow Conf. 109-119;
+#                          doi:10.1029/WR007i005p01160; doi:10.1002/hyp.320
 #   log__routing_K         log10 of Nash-cascade storage time constant [days]
 #                          (N=2 reservoirs in series; mean travel time = N*K)
 #                          Nash (1957) IAHS 45; doi:10.1029/WR015i006p01409
@@ -61,11 +66,11 @@ model
 
 variables
   id_variables = 'V1'
-  continuous_design = 8
-    descriptors   = 'log__t_efold_shallow' 'log__t_efold_soil' 'log__t_efold_karst' 'f_exfiltration_shallow' 'f_exfiltration_soil' 'PDD_melt_factor' 'log__Hmax_shallow' 'log__routing_K'
-    lower_bounds  =  0.3   1.0   2.5   0.01  0.01   0.1   1.0  -1.0
-    upper_bounds  =  2.0   2.7   4.5   0.99  0.99  10.0   3.0   0.5
-    initial_point =  1.2   1.8   3.5   0.80  0.10   1.0   2.3  -0.3
+  continuous_design = 9
+    descriptors   = 'log__t_efold_shallow' 'log__t_efold_soil' 'log__t_efold_karst' 'f_exfiltration_shallow' 'f_exfiltration_soil' 'PDD_melt_factor' 'log__Hmax_shallow' 'log__fdd_threshold' 'log__routing_K'
+    lower_bounds  =  0.3   1.0   2.5   0.01  0.01   0.1   1.0   1.0  -1.0
+    upper_bounds  =  2.0   2.7   4.5   0.99  0.99  10.0   3.0   3.0   0.5
+    initial_point =  1.2   1.8   3.5   0.80  0.10   1.0   2.3   2.0  -0.3
 
 interface
   id_interface = 'I1'

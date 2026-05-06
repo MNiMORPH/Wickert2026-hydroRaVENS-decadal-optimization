@@ -49,6 +49,7 @@ def run_model(params):
         f_to_discharge = [params['f_exfiltration_shallow'],
                           params['f_exfiltration_soil']],
         melt_factor    =  params['PDD_melt_factor'],
+        fdd_threshold  =  10 ** params['log__fdd_threshold'],
         Hmax           = [10 ** params['log__Hmax_shallow']],
         routing_K      =  10 ** params['log__routing_K'],
         routing_N      =  ROUTING_N,
@@ -100,10 +101,11 @@ def make_plot(result, params, save_path, metric=METRIC):
     plt.setp(ax_q.get_xticklabels(), rotation=30, ha='right')
 
     # Annotation box
-    t_shallow = 10 ** params['log__t_efold_shallow']
-    t_soil    = 10 ** params['log__t_efold_soil']
-    t_karst   = 10 ** params['log__t_efold_karst']
-    routing_K = 10 ** params['log__routing_K']
+    t_shallow   = 10 ** params['log__t_efold_shallow']
+    t_soil      = 10 ** params['log__t_efold_soil']
+    t_karst     = 10 ** params['log__t_efold_karst']
+    fdd_thresh  = 10 ** params['log__fdd_threshold']
+    routing_K   = 10 ** params['log__routing_K']
     score_str = f'NSE = {nse:.3f}   KGE = {kge:.3f}'
     if metric not in ('NSE', 'KGE'):
         score_str = f'{metric} = {score:.3f}   ' + score_str
@@ -117,6 +119,7 @@ def make_plot(result, params, save_path, metric=METRIC):
         f'$f_{{soil}}$ = {params["f_exfiltration_soil"]:.3f},  '
         f'PDD = {params["PDD_melt_factor"]:.2f} mm °C$^{{-1}}$ d$^{{-1}}$\n'
         f'$H_{{max}}$ = {10**params["log__Hmax_shallow"]:.0f} mm,  '
+        f'FDD$_{{thresh}}$ = {fdd_thresh:.0f} °C·d\n'
         f'$K_{{route}}$ = {routing_K:.2f} d  (N={ROUTING_N})'
     )
     ax_q.text(0.02, 0.97, ann, transform=ax_q.transAxes,
@@ -163,6 +166,7 @@ if __name__ == '__main__':
     print(f'  f_exfilt_soil    = {best["f_exfiltration_soil"]:.4f}')
     print(f'  PDD_melt_factor  = {best["PDD_melt_factor"]:.4f} mm/°C/day')
     print(f'  Hmax_shallow     = {10**best["log__Hmax_shallow"]:.1f} mm')
+    print(f'  fdd_threshold    = {10**best["log__fdd_threshold"]:.1f} °C·day')
     print(f'  routing_K        = {routing_K:.3f} days  (N={ROUTING_N},'
           f' mean travel time = {ROUTING_N * routing_K:.2f} days)')
 

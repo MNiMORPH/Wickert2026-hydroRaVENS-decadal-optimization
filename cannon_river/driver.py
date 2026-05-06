@@ -31,6 +31,7 @@ try:
         f_to_discharge = [params['f_exfiltration_shallow'],
                           params['f_exfiltration_soil']],
         melt_factor    =  params['PDD_melt_factor'],
+        fdd_threshold  =  10 ** params['log__fdd_threshold'],
         Hmax           = [10 ** params['log__Hmax_shallow']],
         routing_K      =  10 ** params['log__routing_K'],
         routing_N      =  ROUTING_N,
