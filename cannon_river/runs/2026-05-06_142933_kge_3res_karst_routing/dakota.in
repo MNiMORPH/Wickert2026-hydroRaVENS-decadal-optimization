@@ -1,0 +1,90 @@
+# Dakota input file: hydroRaVENS Cannon River parameter calibration
+#
+# Objective: maximize Kling-Gupta Efficiency (KGE) for streamflow.
+#            Dakota minimizes, so the driver returns (1 - KGE).
+#
+# Method: hybrid sequential
+#   1. EGO  – Efficient Global Optimization (Bayesian, global search)
+#   2. PS   – Pattern Search (derivative-free, local refinement)
+#
+# Parameters:
+#   log__t_efold_shallow   log10 of shallow/overland-flow e-folding time [days]
+#   log__t_efold_soil      log10 of soil-zone e-folding time [days]
+#   log__t_efold_karst     log10 of karst/bedrock e-folding time [days]
+#   f_exfiltration_shallow fraction of shallow exfiltration going to stream
+#                          (remainder recharges soil zone)
+#   f_exfiltration_soil    fraction of soil-zone exfiltration going to stream
+#                          (remainder recharges karst reservoir)
+#   PDD_melt_factor        degree-day snowmelt rate [mm SWE / degC / day]
+#   log__Hmax_shallow      log10 of shallow-reservoir max effective depth [mm]
+#                          (saturation-excess overland flow when exceeded)
+#   log__routing_K         log10 of Nash-cascade storage time constant [days]
+#                          (N=2 reservoirs in series; mean travel time = N*K)
+#                          Nash (1957) IAHS 45; doi:10.1029/WR015i006p01409
+#
+# Run from cannon_river/:
+#   dakota -i dakota.in -o dakota.out
+
+environment
+  top_method_pointer = 'HYBRID'
+  tabular_data
+    tabular_data_file = 'dakota.dat'
+
+method
+  id_method = 'HYBRID'
+  hybrid sequential
+    method_pointer_list = 'EGO' 'PS'
+
+method
+  id_method = 'EGO'
+  efficient_global
+    gaussian_process surfpack
+    initial_samples = 200
+    seed = 12345
+    output quiet
+  model_pointer = 'M1'
+
+method
+  id_method = 'PS'
+  coliny_pattern_search
+    max_function_evaluations = 500
+    convergence_tolerance = 1.0e-6
+    output quiet
+  model_pointer = 'M1'
+
+model
+  id_model = 'M1'
+  single
+    interface_pointer = 'I1'
+  variables_pointer = 'V1'
+  responses_pointer = 'R1'
+
+variables
+  id_variables = 'V1'
+  continuous_design = 8
+    descriptors   = 'log__t_efold_shallow' 'log__t_efold_soil' 'log__t_efold_karst' 'f_exfiltration_shallow' 'f_exfiltration_soil' 'PDD_melt_factor' 'log__Hmax_shallow' 'log__routing_K'
+    lower_bounds  =  0.3   1.0   2.5   0.01  0.01   0.1   1.0  -1.0
+    upper_bounds  =  2.0   2.7   4.5   0.99  0.99  10.0   3.0   0.5
+    initial_point =  1.2   1.8   3.5   0.80  0.10   1.0   2.3  -0.3
+
+interface
+  id_interface = 'I1'
+  analysis_driver = 'bash run_driver.sh'
+  fork
+    parameters_file = 'params.in'
+    results_file    = 'results.out'
+    work_directory
+      named 'out/run'
+      directory_tag
+      directory_save
+    file_save
+    copy_files 'driver.py' 'cannon_cfg_template.yml' 'CannonTestInput.csv' 'run_driver.sh'
+    asynchronous
+      evaluation_concurrency = 4
+
+responses
+  id_responses = 'R1'
+  objective_functions = 1
+    response_descriptors = 'neg_kge'
+  no_gradients
+  no_hessians
