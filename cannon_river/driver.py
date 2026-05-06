@@ -13,7 +13,7 @@ from hydroravens import run_and_score
 
 DECADE_START   = None   # None = full record; set e.g. '1990-01-01' for a decade
 DECADE_END     = None
-METRIC         = 'NSE'
+METRIC         = 'KGE'
 SPIN_UP_CYCLES = 3
 INITIAL_STATES = None   # dict from a prior CalibResult.final_states, or None
 ROUTING_N      = 2      # Nash-cascade shape (fixed; increase to calibrate)
