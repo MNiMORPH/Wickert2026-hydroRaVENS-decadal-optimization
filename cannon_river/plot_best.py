@@ -3,6 +3,11 @@
 Find the best-fit parameters from a completed Dakota calibration run,
 re-run hydroRaVENS with those parameters, and produce a diagnostic plot.
 
+Figure layout
+-------------
+Left column  : precipitation (top, inverted) + observed/modelled discharge
+Right column : flow duration curve (log scale) with observed BFI annotated
+
 Usage (from cannon_river/):
     python plot_best.py                      # uses dakota.dat, saves best_fit.png
     python plot_best.py --dat dakota_test.dat --save test_fit.png
@@ -17,8 +22,8 @@ import matplotlib.dates as mdates
 from hydroravens import run_and_score
 from hydroravens.calibration import _nse
 
-CFG_TEMPLATE   = 'cannon_cfg_template.yml'
-OBJECTIVE_COL  = 'neg_kge'   # column in dakota.dat that was minimized
+CFG_TEMPLATE  = 'cannon_cfg_template.yml'
+OBJECTIVE_COL = 'neg_kge'
 
 
 def read_best_params(dat_file):
@@ -31,72 +36,87 @@ def read_best_params(dat_file):
 
 
 def run_model(params):
-    kge, aic, b = run_and_score(
+    return run_and_score(
         CFG_TEMPLATE,
         t_efold        = [10 ** params['log__t_efold_shallow'],
                           10 ** params['log__t_efold_deep']],
         f_to_discharge = [params['f_exfiltration_shallow']],
         melt_factor    =  params['PDD_melt_factor'],
-        metric='KGE',
+        metric         = 'KGE',
     )
-    return kge, aic, b
 
 
-def make_plot(b, params, kge, aic, save_path):
-    # Also compute NSE for comparison
-    q_mod = np.asarray(b.hydrodata['Specific Discharge (modeled) [mm/day]'].dropna())
-    q_obs = np.asarray(b.hydrodata['Specific Discharge [mm/day]'].dropna())
-    # align lengths in case of any NA mismatch
+def make_plot(result, params, save_path):
+    b   = result.buckets
+    kge = result.score
+    aic = result.aic
+
+    # NSE for comparison
     mask = (b.hydrodata['Specific Discharge (modeled) [mm/day]'].notna()
             & b.hydrodata['Specific Discharge [mm/day]'].notna())
-    q_mod = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge (modeled) [mm/day]'])
-    q_obs = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge [mm/day]'])
-    nse = _nse(q_mod, q_obs)
-
-    fig, (ax_p, ax_q) = plt.subplots(
-        2, 1, figsize=(12, 7), sharex=True,
-        gridspec_kw={'height_ratios': [1, 2]}
-    )
+    m_all = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge (modeled) [mm/day]'])
+    o_all = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge [mm/day]'])
+    nse   = _nse(m_all, o_all)
 
     dates = b.hydrodata['Date']
 
-    # --- Precipitation (top, inverted so rain "falls" down) ---
+    # --- Figure layout: left column (time series) + right column (FDC) ---
+    fig = plt.figure(figsize=(14, 7))
+    gs  = fig.add_gridspec(2, 2, width_ratios=[3, 1], height_ratios=[1, 2.5],
+                           hspace=0.05, wspace=0.25)
+    ax_p   = fig.add_subplot(gs[0, 0])
+    ax_q   = fig.add_subplot(gs[1, 0], sharex=ax_p)
+    ax_fdc = fig.add_subplot(gs[:, 1])
+
+    # --- Precipitation (inverted) ---
     ax_p.bar(dates, b.hydrodata['Precipitation [mm/day]'],
              width=1, color='steelblue', alpha=0.7)
-    ax_p.set_ylabel('Precipitation\n[mm/day]')
+    ax_p.set_ylabel('Precip.\n[mm/day]')
     ax_p.invert_yaxis()
     ax_p.yaxis.set_label_position('right')
     ax_p.yaxis.tick_right()
+    plt.setp(ax_p.get_xticklabels(), visible=False)
 
-    # --- Discharge (bottom) ---
+    # --- Discharge time series ---
     ax_q.plot(dates, b.hydrodata['Specific Discharge [mm/day]'],
               color='royalblue', lw=1.5, label='Observed')
     ax_q.plot(dates, b.hydrodata['Specific Discharge (modeled) [mm/day]'],
-              color='k', lw=1.5, label='Modeled')
+              color='k', lw=1.5, label='Modelled')
     ax_q.set_ylabel('Specific discharge [mm/day]')
     ax_q.set_xlabel('Date')
     ax_q.set_ylim(bottom=0)
-    ax_q.legend(loc='upper right')
-
+    ax_q.legend(loc='upper right', fontsize=9)
     ax_q.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
     plt.setp(ax_q.get_xticklabels(), rotation=30, ha='right')
 
-    # Parameter + metric annotation
+    # Annotation box
     t_shallow = 10 ** params['log__t_efold_shallow']
     t_deep    = 10 ** params['log__t_efold_deep']
     ann = (
         f'KGE = {kge:.3f}   NSE = {nse:.3f}   AIC = {aic:.1f}\n'
-        f'$\\tau_{{shallow}}$ = {t_shallow:.1f} d\n'
+        f'BFI: obs = {result.bfi_obs:.3f},  mod = {result.bfi_mod:.3f}\n'
+        f'$\\tau_{{shallow}}$ = {t_shallow:.1f} d,  '
         f'$\\tau_{{deep}}$ = {t_deep:.0f} d\n'
-        f'$f_{{exfilt}}$ = {params["f_exfiltration_shallow"]:.3f}\n'
-        f'PDD factor = {params["PDD_melt_factor"]:.2f} mm °C$^{{-1}}$ d$^{{-1}}$'
+        f'$f_{{exfilt}}$ = {params["f_exfiltration_shallow"]:.3f},  '
+        f'PDD = {params["PDD_melt_factor"]:.2f} mm °C$^{{-1}}$ d$^{{-1}}$'
     )
     ax_q.text(0.02, 0.97, ann, transform=ax_q.transAxes,
-              va='top', fontsize=9,
+              va='top', fontsize=8.5,
               bbox=dict(boxstyle='round', facecolor='white', alpha=0.85))
 
+    # --- Flow duration curve ---
+    ax_fdc.semilogy(result.fdc_obs.index, result.fdc_obs.values,
+                    color='royalblue', lw=1.5, label='Observed')
+    ax_fdc.semilogy(result.fdc_mod.index, result.fdc_mod.values,
+                    color='k', lw=1.5, label='Modelled')
+    ax_fdc.set_xlabel('Exceedance probability [%]')
+    ax_fdc.set_ylabel('Specific discharge [mm/day]')
+    ax_fdc.set_xlim(0, 100)
+    ax_fdc.legend(fontsize=9)
+    ax_fdc.set_title('Flow duration curve', fontsize=10)
+    ax_fdc.grid(True, which='both', alpha=0.3)
+
     fig.suptitle('hydroRaVENS – Cannon River best-fit calibration', fontsize=13)
-    plt.tight_layout()
 
     plt.savefig(save_path, dpi=150, bbox_inches='tight')
     print(f'Figure saved to {save_path}')
@@ -120,6 +140,9 @@ if __name__ == '__main__':
     print(f'  f_exfiltration  = {best["f_exfiltration_shallow"]:.4f}')
     print(f'  PDD_melt_factor = {best["PDD_melt_factor"]:.4f} mm/°C/day')
 
-    kge, aic, b = run_model(best)
-    print(f'  AIC             = {aic:.2f}')
-    make_plot(b, best, kge=kge, aic=aic, save_path=args.save)
+    result = run_model(best)
+    print(f'  AIC             = {result.aic:.2f}')
+    print(f'  BFI obs         = {result.bfi_obs:.4f}')
+    print(f'  BFI mod         = {result.bfi_mod:.4f}')
+
+    make_plot(result, best, save_path=args.save)
