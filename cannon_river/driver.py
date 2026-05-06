@@ -28,6 +28,7 @@ try:
                           10 ** params['log__t_efold_deep']],
         f_to_discharge = [params['f_exfiltration_shallow']],
         melt_factor    =  params['PDD_melt_factor'],
+        Hmax           = [10 ** params['log__Hmax_shallow']],
         initial_states = INITIAL_STATES,
         start          = DECADE_START,
         end            = DECADE_END,
