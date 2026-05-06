@@ -20,7 +20,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from hydroravens import run_and_score
-from hydroravens.calibration import _nse
+from hydroravens.calibration import _nse, _kge
 
 CFG_TEMPLATE  = 'cannon_cfg_template.yml'
 OBJECTIVE_COL = 'neg_kge'
@@ -65,7 +65,8 @@ def make_plot(result, params, save_path, metric=METRIC):
              & b.hydrodata['Specific Discharge [mm/day]'].notna())
     m_all = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge (modeled) [mm/day]'])
     o_all = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge [mm/day]'])
-    nse   = _nse(m_all, o_all)   # always shown for reference
+    nse   = _nse(m_all, o_all)
+    kge   = _kge(m_all, o_all)
 
     dates = b.hydrodata['Date']
 
@@ -103,9 +104,9 @@ def make_plot(result, params, save_path, metric=METRIC):
     t_soil    = 10 ** params['log__t_efold_soil']
     t_karst   = 10 ** params['log__t_efold_karst']
     routing_K = 10 ** params['log__routing_K']
-    score_str = f'{metric} = {score:.3f}'
-    if metric != 'NSE':
-        score_str += f'   NSE = {nse:.3f}'
+    score_str = f'NSE = {nse:.3f}   KGE = {kge:.3f}'
+    if metric not in ('NSE', 'KGE'):
+        score_str = f'{metric} = {score:.3f}   ' + score_str
     ann = (
         f'{score_str}   AIC = {aic:.1f}\n'
         f'BFI: obs = {result.bfi_obs:.3f},  mod = {result.bfi_mod:.3f}\n'
@@ -154,7 +155,7 @@ if __name__ == '__main__':
     t_karst   = 10 ** best['log__t_efold_karst']
     routing_K = 10 ** best['log__routing_K']
     print(f'\nBest evaluation: {int(best["eval_id"])}')
-    print(f'  {METRIC:<16} = {1 - best[OBJECTIVE_COL]:.4f}')
+    print(f'  optimised on     = {METRIC}')
     print(f'  t_efold_shallow  = {t_shallow:.1f} days')
     print(f'  t_efold_soil     = {t_soil:.0f} days')
     print(f'  t_efold_karst    = {t_karst:.0f} days')
@@ -166,8 +167,15 @@ if __name__ == '__main__':
           f' mean travel time = {ROUTING_N * routing_K:.2f} days)')
 
     result = run_model(best)
-    print(f'  AIC             = {result.aic:.2f}')
-    print(f'  BFI obs         = {result.bfi_obs:.4f}')
-    print(f'  BFI mod         = {result.bfi_mod:.4f}')
+    b     = result.buckets
+    mask  = (b.hydrodata['Specific Discharge (modeled) [mm/day]'].notna()
+             & b.hydrodata['Specific Discharge [mm/day]'].notna())
+    m_all = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge (modeled) [mm/day]'])
+    o_all = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge [mm/day]'])
+    print(f'  NSE              = {_nse(m_all, o_all):.4f}')
+    print(f'  KGE              = {_kge(m_all, o_all):.4f}')
+    print(f'  AIC              = {result.aic:.2f}')
+    print(f'  BFI obs          = {result.bfi_obs:.4f}')
+    print(f'  BFI mod          = {result.bfi_mod:.4f}')
 
     make_plot(result, best, save_path=args.save, metric=METRIC)
