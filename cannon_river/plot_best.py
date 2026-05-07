@@ -142,13 +142,13 @@ def make_plot(result, params, save_path, metric=METRIC):
 
     plt.savefig(save_path, dpi=150, bbox_inches='tight')
     print(f'Figure saved to {save_path}')
-    plt.show()
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dat',  default='dakota.dat',   help='Dakota tabular data file')
-    parser.add_argument('--save', default='best_fit.png', help='Output figure path')
+    parser.add_argument('--dat',     default='dakota.dat',   help='Dakota tabular data file')
+    parser.add_argument('--save',    default='best_fit.png', help='Output figure path')
+    parser.add_argument('--no-show', action='store_true',    help='Save only; skip plt.show()')
     args = parser.parse_args()
 
     best = read_best_params(args.dat)
@@ -183,3 +183,5 @@ if __name__ == '__main__':
     print(f'  BFI mod          = {result.bfi_mod:.4f}')
 
     make_plot(result, best, save_path=args.save, metric=METRIC)
+    if not args.no_show:
+        plt.show()

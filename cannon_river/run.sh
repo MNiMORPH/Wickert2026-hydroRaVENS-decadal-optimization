@@ -23,14 +23,17 @@ rm -rf out dakota.dat dakota.out dakota.rst fort.13 LHS_*.out
 # Optimise
 $DAKOTA -i dakota.in -o dakota.out
 
-# Diagnostic plot (non-fatal if it fails)
-if $PYTHON plot_best.py --save best_fit.png; then
+# Save figure without showing it so we can archive before blocking on display.
+if $PYTHON plot_best.py --save best_fit.png --no-show; then
     echo "Best-fit plot saved."
 else
     echo "Warning: plot_best.py failed; archiving without plot." >&2
 fi
 
-# Archive
+# Archive while dakota.dat / best_fit.png still belong to this run
 bash archive_run.sh "$RUN_NAME"
 
 echo "=== Archived to runs/$RUN_NAME ==="
+
+# Open the archived figure non-blocking so new runs are unaffected
+[[ -f "runs/$RUN_NAME/best_fit.png" ]] && xdg-open "runs/$RUN_NAME/best_fit.png" &
