@@ -1,7 +1,7 @@
 # Dakota input file: hydroRaVENS Cannon River parameter calibration
 #
-# Objective: maximize Kling-Gupta Efficiency (KGE) for streamflow.
-#            Dakota minimizes, so the driver returns (1 - KGE).
+# Objective: maximize log-KGE (logKGE) for streamflow.
+#            Dakota minimizes, so the driver returns (1 - logKGE).
 #
 # Method: hybrid sequential
 #   1. EGO  – Efficient Global Optimization (Bayesian, global search)

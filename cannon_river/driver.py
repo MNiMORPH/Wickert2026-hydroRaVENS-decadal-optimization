@@ -41,10 +41,10 @@ try:
         spin_up_cycles = SPIN_UP_CYCLES,
         metric         = METRIC,
     )
-    neg_kge = 1.0 - result.score if np.isfinite(result.score) else PENALTY
+    neg_score = 1.0 - result.score if np.isfinite(result.score) else PENALTY
 
 except Exception:
-    neg_kge = PENALTY
+    neg_score = PENALTY
 
-results['neg_kge'].function = neg_kge
+results['neg_kge'].function = neg_score
 results.write()
