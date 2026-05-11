@@ -9,11 +9,11 @@ timeseries:
   datafile: CannonTestInput.csv
 
 initial_conditions:
-  water_reservoir_effective_depths__m:
+  water_reservoir_effective_depths__mm:
     - 0.1     # shallow / overland-flow reservoir
     - 100     # soil-zone reservoir
     - 2000    # karst / bedrock reservoir
-  snowpack__m_SWE: 0
+  snowpack__mm_SWE: 0
 
 catchment:
   drainage_basin_area__km2: 3800
@@ -33,7 +33,7 @@ reservoirs:
     - 0.8     # shallow: fraction to stream vs. percolating to soil zone (overridden)
     - 0.1     # soil zone: fraction to stream vs. recharging karst      (overridden)
     - 1.0     # karst: deepest layer, must be 1.0 for mass conservation
-  maximum_effective_depths__m:
+  maximum_effective_depths__mm:
     - .inf    # shallow: Hmax overridden by driver (saturation-excess threshold)
     - .inf    # soil zone: no saturation-excess threshold
     - .inf    # karst: no saturation-excess threshold
