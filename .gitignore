@@ -217,6 +217,9 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+# Vim swap files
+*.swp
+
 # Dakota output directories and large output files
 */out/
 dakota.dat
