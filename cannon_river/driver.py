@@ -25,6 +25,19 @@ DECADE_END     = _driver['decade_end']
 MODULES        = _cfg.get('modules', {})
 INITIAL_STATES = None   # set to a CalibResult.final_states dict for chained decades
 
+# Mirror generate_dakota_in.py's module auto-fix so active flags match dakota.in.
+_MODULE_PARAMS = {
+    'snowpack':      ['PDD_melt_factor'],
+    'frozen_ground': ['log__fdd_threshold', 'snow_insulation_k'],
+    'direct_runoff': ['f_direct_runoff'],
+    'rain_on_snow':  [],
+}
+for _mod, _names in _MODULE_PARAMS.items():
+    if not MODULES.get(_mod, True):
+        for _name in _names:
+            if _name in _param_cfg:
+                _param_cfg[_name]['active'] = False
+
 PENALTY = 2.0   # returned on model failure; safely above any real 1 - score
 
 params, results = di.read_parameters_file()
@@ -46,6 +59,7 @@ try:
                                   get('f_exfiltration_soil')],
         melt_factor           =  get('PDD_melt_factor'),
         fdd_threshold         =  10 ** get('log__fdd_threshold'),
+        snow_insulation_k     =  get('snow_insulation_k'),
         Hmax                  = [10 ** get('log__Hmax_shallow')],
         direct_runoff_fraction=  get('f_direct_runoff'),
         modules               =  MODULES,
