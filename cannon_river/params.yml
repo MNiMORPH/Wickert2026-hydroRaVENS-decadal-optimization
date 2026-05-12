@@ -107,6 +107,14 @@ parameters:
     fixed:   0.0   # 0 = Hortonian runoff disabled
     active:  true
 
+  baseflow_Q:
+    description: "constant regional groundwater import [mm/day]; represents deep confined-aquifer discharge decoupled from the shallow water balance"
+    lower:   0.0
+    upper:   0.3
+    initial: 0.05
+    fixed:   0.0
+    active:  true
+
   log__routing_K:
     description: "log10 Nash-cascade storage time constant [days] (N=2; mean travel time = N*K)"
     lower:   -1.0

@@ -62,6 +62,7 @@ try:
         snow_insulation_k     =  get('snow_insulation_k'),
         Hmax                  = [10 ** get('log__Hmax_shallow')],
         direct_runoff_fraction=  get('f_direct_runoff'),
+        baseflow_Q            =  get('baseflow_Q'),
         modules               =  MODULES,
         routing_K             =  10 ** get('log__routing_K'),
         routing_N             =  ROUTING_N,
