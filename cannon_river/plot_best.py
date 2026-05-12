@@ -15,17 +15,36 @@ Usage (from cannon_river/):
 
 import argparse
 import sys
+import yaml
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from hydroravens import run_and_score
-from hydroravens.calibration import _nse, _kge
+from hydroravens.calibration import _nse, _kge, _log_kge, _kge_logfdc
 
 CFG_TEMPLATE  = 'cannon_cfg_template.yml'
 OBJECTIVE_COL = 'neg_kge'
-METRIC        = 'logKGE'
 ROUTING_N     = 2      # Nash-cascade shape; must match driver.py ROUTING_N
+
+def _load_params_yml(path):
+    try:
+        with open(path) as f:
+            pcfg = yaml.safe_load(f)
+        return (pcfg['driver']['metric'],
+                pcfg.get('modules', {}),
+                pcfg['parameters'])
+    except FileNotFoundError:
+        return 'KGE_logKGE_logFDC', {}, {}
+
+# Deferred: populated after --params arg is parsed
+METRIC  = None
+MODULES = None
+_PARAMS = None
+
+
+def _is_active(name):
+    return (_PARAMS or {}).get(name, {}).get('active', False)
 
 
 def read_best_params(dat_file):
@@ -41,8 +60,7 @@ def read_best_params(dat_file):
 
 
 def run_model(params):
-    return run_and_score(
-        CFG_TEMPLATE,
+    kwargs = dict(
         t_efold        = [10 ** params['log__t_efold_shallow'],
                           10 ** params['log__t_efold_soil'],
                           10 ** params['log__t_efold_karst']],
@@ -53,8 +71,14 @@ def run_model(params):
         Hmax           = [10 ** params['log__Hmax_shallow']],
         routing_K      =  10 ** params['log__routing_K'],
         routing_N      =  ROUTING_N,
+        modules        =  MODULES,
         metric         =  METRIC,
     )
+    # Auto-detect f_direct_runoff: use it if present and finite in the dat file
+    val = params.get('f_direct_runoff', None)
+    if val is not None and pd.notna(val):
+        kwargs['direct_runoff_fraction'] = float(val)
+    return run_and_score(CFG_TEMPLATE, **kwargs)
 
 
 def make_plot(result, params, save_path, metric=METRIC):
@@ -66,8 +90,10 @@ def make_plot(result, params, save_path, metric=METRIC):
              & b.hydrodata['Specific Discharge [mm/day]'].notna())
     m_all = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge (modeled) [mm/day]'])
     o_all = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge [mm/day]'])
-    nse   = _nse(m_all, o_all)
-    kge   = _kge(m_all, o_all)
+    nse        = _nse(m_all, o_all)
+    kge        = _kge(m_all, o_all)
+    log_kge    = _log_kge(m_all, o_all)
+    kge_logfdc = result.kge_logfdc
 
     dates = b.hydrodata['Date']
 
@@ -101,16 +127,14 @@ def make_plot(result, params, save_path, metric=METRIC):
     plt.setp(ax_q.get_xticklabels(), rotation=30, ha='right')
 
     # Annotation box
-    t_shallow   = 10 ** params['log__t_efold_shallow']
-    t_soil      = 10 ** params['log__t_efold_soil']
-    t_karst     = 10 ** params['log__t_efold_karst']
-    fdd_thresh  = 10 ** params['log__fdd_threshold']
-    routing_K   = 10 ** params['log__routing_K']
-    score_str = f'NSE = {nse:.3f}   KGE = {kge:.3f}'
-    if metric not in ('NSE', 'KGE'):
-        score_str = f'{metric} = {score:.3f}   ' + score_str
-    ann = (
-        f'{score_str}   AIC = {aic:.1f}\n'
+    t_shallow  = 10 ** params['log__t_efold_shallow']
+    t_soil     = 10 ** params['log__t_efold_soil']
+    t_karst    = 10 ** params['log__t_efold_karst']
+    fdd_thresh = 10 ** params['log__fdd_threshold']
+    routing_K  = 10 ** params['log__routing_K']
+
+    score_str = f'logKGE = {log_kge:.3f}   NSE = {nse:.3f}   KGE = {kge:.3f}   KGE$_{{logFDC}}$ = {kge_logfdc:.3f}   AIC = {aic:.1f}'
+    param_lines = (
         f'BFI: obs = {result.bfi_obs:.3f},  mod = {result.bfi_mod:.3f}\n'
         f'$\\tau_{{sh}}$ = {t_shallow:.1f} d,  '
         f'$\\tau_{{soil}}$ = {t_soil:.0f} d,  '
@@ -122,6 +146,10 @@ def make_plot(result, params, save_path, metric=METRIC):
         f'FDD$_{{thresh}}$ = {fdd_thresh:.0f} °C·d\n'
         f'$K_{{route}}$ = {routing_K:.2f} d  (N={ROUTING_N})'
     )
+    if _is_active('f_direct_runoff'):
+        param_lines += f'\n$\\gamma_{{direct}}$ = {params["f_direct_runoff"]:.3f}'
+
+    ann = score_str + '\n' + param_lines
     ax_q.text(0.02, 0.97, ann, transform=ax_q.transAxes,
               va='top', fontsize=8.5,
               bbox=dict(boxstyle='round', facecolor='white', alpha=0.85))
@@ -146,10 +174,13 @@ def make_plot(result, params, save_path, metric=METRIC):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dat',     default='dakota.dat',   help='Dakota tabular data file')
-    parser.add_argument('--save',    default='best_fit.png', help='Output figure path')
-    parser.add_argument('--no-show', action='store_true',    help='Save only; skip plt.show()')
+    parser.add_argument('--dat',    default='dakota.dat',   help='Dakota tabular data file')
+    parser.add_argument('--save',   default='best_fit.png', help='Output figure path')
+    parser.add_argument('--params', default='params.yml',   help='params.yml config file')
+    parser.add_argument('--no-show', action='store_true',   help='Save only; skip plt.show()')
     args = parser.parse_args()
+
+    METRIC, MODULES, _PARAMS = _load_params_yml(args.params)
 
     best = read_best_params(args.dat)
 
@@ -158,7 +189,7 @@ if __name__ == '__main__':
     t_karst   = 10 ** best['log__t_efold_karst']
     routing_K = 10 ** best['log__routing_K']
     print(f'\nBest evaluation: {int(best["eval_id"])}')
-    print(f'  optimised on     = {METRIC}')
+    print(f'  metric           = {METRIC}')
     print(f'  t_efold_shallow  = {t_shallow:.1f} days')
     print(f'  t_efold_soil     = {t_soil:.0f} days')
     print(f'  t_efold_karst    = {t_karst:.0f} days')
@@ -169,6 +200,8 @@ if __name__ == '__main__':
     print(f'  fdd_threshold    = {10**best["log__fdd_threshold"]:.1f} °C·day')
     print(f'  routing_K        = {routing_K:.3f} days  (N={ROUTING_N},'
           f' mean travel time = {ROUTING_N * routing_K:.2f} days)')
+    if _is_active('f_direct_runoff'):
+        print(f'  f_direct_runoff  = {best["f_direct_runoff"]:.4f}')
 
     result = run_model(best)
     b     = result.buckets
@@ -176,8 +209,10 @@ if __name__ == '__main__':
              & b.hydrodata['Specific Discharge [mm/day]'].notna())
     m_all = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge (modeled) [mm/day]'])
     o_all = np.asarray(b.hydrodata.loc[mask, 'Specific Discharge [mm/day]'])
+    print(f'  logKGE           = {_log_kge(m_all, o_all):.4f}')
     print(f'  NSE              = {_nse(m_all, o_all):.4f}')
     print(f'  KGE              = {_kge(m_all, o_all):.4f}')
+    print(f'  KGE_logFDC       = {result.kge_logfdc:.4f}')
     print(f'  AIC              = {result.aic:.2f}')
     print(f'  BFI obs          = {result.bfi_obs:.4f}')
     print(f'  BFI mod          = {result.bfi_mod:.4f}')

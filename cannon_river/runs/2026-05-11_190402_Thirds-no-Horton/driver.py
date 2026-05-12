@@ -22,7 +22,6 @@ SPIN_UP_CYCLES = _driver['spin_up_cycles']
 ROUTING_N      = _driver['routing_N']
 DECADE_START   = _driver['decade_start']
 DECADE_END     = _driver['decade_end']
-MODULES        = _cfg.get('modules', {})
 INITIAL_STATES = None   # set to a CalibResult.final_states dict for chained decades
 
 PENALTY = 2.0   # returned on model failure; safely above any real 1 - score
@@ -48,7 +47,6 @@ try:
         fdd_threshold         =  10 ** get('log__fdd_threshold'),
         Hmax                  = [10 ** get('log__Hmax_shallow')],
         direct_runoff_fraction=  get('f_direct_runoff'),
-        modules               =  MODULES,
         routing_K             =  10 ** get('log__routing_K'),
         routing_N             =  ROUTING_N,
         initial_states        =  INITIAL_STATES,

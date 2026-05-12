@@ -39,9 +39,3 @@ reservoirs:
 
 snowmelt:
   PDD_melt_factor: 1.0   # mm SWE per positive degC per day (placeholder; overridden)
-
-modules:
-  snowpack:      true
-  frozen_ground: true
-  rain_on_snow:  true
-  direct_runoff: true
