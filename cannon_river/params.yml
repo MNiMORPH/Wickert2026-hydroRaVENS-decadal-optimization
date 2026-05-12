@@ -20,7 +20,7 @@ dakota:
   evaluation_concurrency:    4
 
 driver:
-  metric:         'KGE_logKGE_logFDC'  # KGE (peaks) + logKGE (low-flow timing) + KGE_logFDC (flow regime)
+  metric:         'KGE_logKGE_logFDC_BFI'  # KGE + logKGE + KGE_logFDC + BFI bias-ratio
   spin_up_cycles: 3
   routing_N:      2        # Nash-cascade shape parameter (fixed)
   decade_start:   null     # null = full record; e.g. '1990-01-01' for a decade
