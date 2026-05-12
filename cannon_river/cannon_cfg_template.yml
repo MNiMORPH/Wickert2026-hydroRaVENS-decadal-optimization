@@ -48,3 +48,4 @@ modules:
   frozen_ground: true
   rain_on_snow:  true
   direct_runoff: false   # off; driver.py passes MODULES which controls model behaviour
+  dtr_fgi_decay: false   # off; revert to constant fgi_decay_coeff (M&B 0.97)
