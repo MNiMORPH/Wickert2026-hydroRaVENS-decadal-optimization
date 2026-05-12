@@ -87,8 +87,8 @@ parameters:
     description: "log10 frozen-ground-index threshold [degC·day]; blocks shallow-to-soil infiltration"
     lower:   0.0
     upper:   3.0
-    initial: 1.0
-    fixed:   1.0
+    initial: 1.9
+    fixed:   1.9
     active:  true
 
   snow_insulation_k:
