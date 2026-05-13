@@ -17,6 +17,7 @@ with open('params.yml') as f:
 _driver     = _cfg['driver']
 _param_cfg  = _cfg['parameters']
 
+CONFIG_TEMPLATE = _driver['config_template']
 METRIC         = _driver['metric']
 SPIN_UP_CYCLES = _driver['spin_up_cycles']
 ROUTING_N      = _driver['routing_N']
@@ -51,7 +52,7 @@ def get(name):
 
 try:
     result = run_and_score(
-        'cannon_cfg_template.yml',
+        CONFIG_TEMPLATE,
         t_efold               = [10 ** get('log__t_efold_shallow'),
                                   10 ** get('log__t_efold_soil'),
                                   10 ** get('log__t_efold_karst')],
