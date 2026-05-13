@@ -97,8 +97,8 @@ parameters:
     lower:   0.0
     upper:   0.15
     initial: 0.057
-    fixed:   0.0   # 0 = insulation disabled
-    active:  false
+    fixed:   0.0
+    active:  true
 
   f_direct_runoff:
     description: "fast-bypass fraction of daily recharge; Hortonian-inspired but not rigorous at daily scale"
