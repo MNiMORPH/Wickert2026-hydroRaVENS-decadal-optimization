@@ -45,5 +45,5 @@ modules:
   snowpack:      true
   frozen_ground: true
   rain_on_snow:  true
-  direct_runoff: true
+  direct_runoff: false
   dtr_fgi_decay: false
