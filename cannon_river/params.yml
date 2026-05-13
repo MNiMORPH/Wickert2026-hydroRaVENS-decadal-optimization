@@ -22,7 +22,7 @@ dakota:
 driver:
   config_template: 'cannon_cfg_1991_2011_et_tc.yml'        # swap to et_datafile for Livneh reanalysis ET
   metric:         'logKGE_logFDC_BFI'  # logKGE + KGE_logFDC + BFI; no linear KGE
-  spin_up_cycles: 3
+  spin_up_cycles: null  # null = auto: ceil(tau_max / record_length)
   routing_N:      2        # Nash-cascade shape parameter (fixed)
   decade_start:   null     # null = full record; e.g. '1990-01-01' for a decade
   decade_end:     null
