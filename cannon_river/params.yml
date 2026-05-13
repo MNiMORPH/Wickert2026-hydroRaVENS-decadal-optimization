@@ -9,7 +9,7 @@ modules:
   snowpack:      true
   frozen_ground: true
   rain_on_snow:  true   # no dedicated calibration parameter; model-behaviour only
-  direct_runoff: false
+  direct_runoff: true
   dtr_fgi_decay: false  # disabled; test baseflow_Q on stable M&B foundation
 
 dakota:
