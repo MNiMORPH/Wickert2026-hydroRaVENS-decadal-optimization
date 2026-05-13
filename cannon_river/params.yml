@@ -13,10 +13,10 @@ modules:
   dtr_fgi_decay: false  # disabled; test baseflow_Q on stable M&B foundation
 
 dakota:
-  ego_initial_samples:       200
+  ego_initial_samples:       300
   ego_seed:                  12345
-  ps_max_evaluations:        500
-  ps_convergence_tolerance:  1.0e-6
+  ps_max_evaluations:        200
+  ps_convergence_tolerance:  1.0e-4
   evaluation_concurrency:    4
 
 driver:

@@ -29,7 +29,7 @@ method
   id_method = 'EGO'
   efficient_global
     gaussian_process surfpack
-    initial_samples = 200
+    initial_samples = 300
     seed = 12345
     output quiet
   model_pointer = 'M1'
@@ -37,8 +37,8 @@ method
 method
   id_method = 'PS'
   coliny_pattern_search
-    max_function_evaluations = 500
-    convergence_tolerance = 1e-06
+    max_function_evaluations = 200
+    convergence_tolerance = 0.0001
     output quiet
   model_pointer = 'M1'
 
