@@ -23,7 +23,11 @@ import matplotlib.dates as mdates
 from hydroravens import run_and_score
 from hydroravens.calibration import _nse, _kge, _log_kge, _kge_logfdc
 
-CFG_TEMPLATE  = 'cannon_cfg_template.yml'
+try:
+    with open('params.yml') as _f:
+        CFG_TEMPLATE = yaml.safe_load(_f)['driver']['config_template']
+except (FileNotFoundError, KeyError):
+    CFG_TEMPLATE = 'cannon_cfg_template.yml'
 OBJECTIVE_COL = 'neg_kge'
 ROUTING_N     = 2      # Nash-cascade shape; must match driver.py ROUTING_N
 
@@ -92,6 +96,7 @@ def run_model(row):
         snow_insulation_k     =  _get(row, 'snow_insulation_k'),
         Hmax                  = [10 ** _get(row, 'log__Hmax_shallow')],
         direct_runoff_fraction=  _get(row, 'f_direct_runoff'),
+        baseflow_Q            =  _get(row, 'baseflow_Q'),
         routing_K             =  10 ** _get(row, 'log__routing_K'),
         routing_N             =  ROUTING_N,
         modules               =  MODULES,
