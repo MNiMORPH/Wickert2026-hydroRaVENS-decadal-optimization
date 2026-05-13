@@ -15,6 +15,11 @@ with open('params.yml') as f:
 dakota  = cfg['dakota']
 modules = cfg.get('modules', {})
 
+config_template = cfg['driver']['config_template']
+with open(config_template) as f:
+    _tmpl = yaml.safe_load(f)
+datafile = _tmpl['timeseries']['datafile']
+
 # Parameters owned by each module: disabled module → parameter fixed regardless
 # of its own active flag.
 _MODULE_PARAMS = {
@@ -107,7 +112,7 @@ interface
       directory_tag
       directory_save
     file_save
-    copy_files 'driver.py' 'cannon_cfg_template.yml' 'CannonTestInput.csv' 'run_driver.sh' 'params.yml'
+    copy_files 'driver.py' '{config_template}' '{datafile}' 'run_driver.sh' 'params.yml'
     asynchronous
       evaluation_concurrency = {dakota['evaluation_concurrency']}
 

@@ -69,7 +69,7 @@ interface
       directory_tag
       directory_save
     file_save
-    copy_files 'driver.py' 'cannon_cfg_template.yml' 'CannonTestInput.csv' 'run_driver.sh' 'params.yml'
+    copy_files 'driver.py' 'cannon_cfg_1991_2011_et_tc.yml' 'Cannon1991-2011Input.csv' 'run_driver.sh' 'params.yml'
     asynchronous
       evaluation_concurrency = 4
 
