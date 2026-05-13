@@ -220,6 +220,9 @@ __marimo__/
 # Vim swap files
 *.swp
 
+# Best-fit plot in field-site root (kept in runs/ archives instead)
+*/best_fit.png
+
 # Dakota output directories and large output files
 */out/
 dakota.dat
