@@ -1,0 +1,153 @@
+# 1921-1930: independent calibration, 1921-01-01 to 1930-12-31.
+# Model structure and initial parameter values from A02 best-fit
+# (3-res soil/intermediate/deep, frozen ground, snow insulation, k=9).
+# decade_start/decade_end slice the full 1893-2024 forcing at runtime.
+
+modules:
+  snowpack:          true
+  frozen_ground:     true
+  rain_on_snow:      true
+  direct_runoff:     false
+  dtr_fgi_decay:     true
+  et_water_stress:   false
+  et_reservoir_draw: true
+
+dakota:
+  ego_initial_samples:       300
+  ego_seed:                  12345
+  ps_max_evaluations:        200
+  ps_convergence_tolerance:  1.0e-4
+  evaluation_concurrency:    4
+
+driver:
+  config_template:       'cannon_config_1893_2024.yml'
+  metric:                'KGE_logKGE'
+  spin_up_cycles:        1
+  routing_N:             2
+  n_reservoirs:          3
+  reservoir_order:       ['soil', 'intermediate', 'deep']
+  decade_start:          '1921-01-01'
+  decade_end:            '1930-12-31'
+  enforce_water_balance: 'global'
+
+parameters:
+
+  log__t_recession_soil:
+    description: "log10 soil-zone recession time scale [days]"
+    lower:   1.0
+    upper:   4.5
+    initial: 4.493
+    fixed:   4.493
+    active:  true
+
+  log__t_recession_intermediate:
+    description: "log10 intermediate recession time scale [days]"
+    lower:   1.0
+    upper:   4.5
+    initial: 1.021
+    fixed:   1.021
+    active:  true
+
+  log__t_recession_deep:
+    description: "log10 deep groundwater recession time scale [days]"
+    lower:   3.5
+    upper:   5.0
+    initial: 3.771
+    fixed:   3.771
+    active:  true
+
+  f_exfiltration_soil:
+    description: "fraction of soil-zone drainage to stream (remainder recharges intermediate)"
+    lower:   0.01
+    upper:   0.99
+    initial: 0.6662
+    fixed:   0.6662
+    active:  true
+
+  f_exfiltration_intermediate:
+    description: "fraction of intermediate drainage to stream (remainder recharges deep)"
+    lower:   0.01
+    upper:   0.99
+    initial: 0.0120
+    fixed:   0.0120
+    active:  true
+
+  PDD_melt_factor:
+    description: "degree-day snowmelt rate [mm SWE / degC / day]"
+    lower:   0.1
+    upper:   10.0
+    initial: 7.8611
+    fixed:   7.8611
+    active:  true
+
+  recession_b_soil:
+    description: "power-law recession exponent for soil zone [dimensionless]"
+    lower:   1.5
+    upper:   6.0
+    initial: 5.4907
+    fixed:   5.4907
+    active:  true
+
+  recession_b_intermediate:
+    description: "intermediate recession exponent fixed at 2.203 (Brutsaert-Nieber lower envelope)"
+    lower:   1.0
+    upper:   6.0
+    initial: 2.203
+    fixed:   2.203
+    active:  false
+
+  log__fdd_threshold:
+    description: "log10 frozen-ground-index threshold [degC·day]; blocks infiltration when exceeded"
+    lower:   0.0
+    upper:   3.0
+    initial: 2.502
+    fixed:   2.502
+    active:  true
+
+  snow_insulation_k:
+    description: "snow insulation decay constant [mm⁻¹ SWE]; T_eff = T·exp(-k·SWE)"
+    lower:   0.0
+    upper:   1.0
+    initial: 0.057
+    fixed:   0.0
+    active:  true
+
+  et_scale:
+    description: "global ET multiplier — inactive (water balance enforced globally)"
+    lower:   0.5
+    upper:   2.0
+    initial: 1.0
+    fixed:   1.0
+    active:  false
+
+  et_alpha:
+    description: "ET partition fraction — fixed at 1.0 (all ET from soil)"
+    lower:   0.01
+    upper:   0.99
+    initial: 1.0
+    fixed:   1.0
+    active:  false
+
+  f_direct_runoff:
+    description: "fast-bypass fraction of daily recharge — inactive"
+    lower:   0.0
+    upper:   0.5
+    initial: 0.05
+    fixed:   0.0
+    active:  false
+
+  baseflow_Q:
+    description: "constant regional groundwater import [mm/day] — inactive"
+    lower:   0.0
+    upper:   0.5
+    initial: 0.0
+    fixed:   0.0
+    active:  false
+
+  log__routing_K:
+    description: "log10 Nash-cascade storage time constant [days] — inactive"
+    lower:   -1.0
+    upper:    1.0
+    initial:  0.0
+    fixed:    0.0
+    active:  false
