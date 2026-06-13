@@ -77,11 +77,15 @@ def _load_params_yml(path):
         fixed_rec  = drv.get('recession_exponents', None)
         enforce_wb = drv.get('enforce_water_balance', 'water-year')
         spin_up    = drv.get('spin_up_cycles', 0)
+        decade_start = drv.get('decade_start', None)
+        decade_end   = drv.get('decade_end',   None)
         return (drv['metric'], modules, params,
-                res_order, fixed_rec, enforce_wb, spin_up)
+                res_order, fixed_rec, enforce_wb, spin_up,
+                decade_start, decade_end)
     except FileNotFoundError:
         return ('KGE_logKGE', {}, {},
-                ['shallow', 'soil', 'karst'], None, 'water-year', 0)
+                ['shallow', 'soil', 'karst'], None, 'water-year', 0,
+                None, None)
 
 
 # ---------------------------------------------------------------------------
@@ -92,6 +96,8 @@ MODULES          = None
 _PARAMS          = None
 RESERVOIR_ORDER  = ['shallow', 'soil', 'karst']
 _FIXED_RECESSION = None
+DECADE_START     = None
+DECADE_END       = None
 ENFORCE_WB       = 'water-year'
 SPIN_UP_CYCLES   = 0
 INITIAL_STATES   = None
@@ -244,6 +250,8 @@ def run_model(row):
         enforce_water_balance  =  ENFORCE_WB,
         spin_up_cycles         =  SPIN_UP_CYCLES,
         initial_states         =  INITIAL_STATES,
+        start                  =  DECADE_START,
+        end                    =  DECADE_END,
     )
 
 
@@ -287,6 +295,9 @@ def make_plot(result, params_row, save_path):
     ax_q.set_ylabel('Specific discharge [mm/day]')
     ax_q.set_xlabel('Date')
     ax_q.set_ylim(bottom=0)
+    if DECADE_START is not None:
+        ax_q.set_xlim(pd.Timestamp(DECADE_START),
+                      pd.Timestamp(DECADE_END) if DECADE_END else dates.iloc[-1])
     ax_q.legend(loc='upper right', fontsize=9)
     ax_q.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
     plt.setp(ax_q.get_xticklabels(), rotation=30, ha='right')
@@ -417,7 +428,8 @@ if __name__ == '__main__':
 
     (METRIC, MODULES, _PARAMS,
      RESERVOIR_ORDER, _FIXED_RECESSION,
-     ENFORCE_WB, SPIN_UP_CYCLES) = _load_params_yml(args.params)
+     ENFORCE_WB, SPIN_UP_CYCLES,
+     DECADE_START, DECADE_END) = _load_params_yml(args.params)
 
     with open(args.params) as _pf:
         CFG_TEMPLATE = yaml.safe_load(_pf)['driver']['config_template']
