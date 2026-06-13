@@ -3,13 +3,19 @@
 Generate dakota.in from params.yml.
 
 Usage:
-    python generate_dakota_in.py
+    python generate_dakota_in.py --params decades/1911-1920/params.yml
 """
 
+import argparse
 import yaml
 from pathlib import Path
 
-with open('params.yml') as f:
+parser = argparse.ArgumentParser()
+parser.add_argument('--params', default='params.yml',
+                    help='Path to params.yml (default: params.yml)')
+args = parser.parse_args()
+
+with open(args.params) as f:
     cfg = yaml.safe_load(f)
 
 dakota  = cfg['dakota']
@@ -112,7 +118,7 @@ interface
       directory_tag
       directory_save
     file_save
-    copy_files 'driver.py' '{config_template}' '{datafile}' 'run_driver.sh' 'params.yml'
+    copy_files 'driver.py' '{config_template}' '{datafile}' 'run_driver.sh' '{args.params}'
     asynchronous
       evaluation_concurrency = {dakota['evaluation_concurrency']}
 
