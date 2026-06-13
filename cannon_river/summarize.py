@@ -255,6 +255,10 @@ for decade_dir in decade_dirs:
         b    = result.buckets
         mask = (b.hydrodata['Specific Discharge (modeled) [mm/day]'].notna()
                 & b.hydrodata['Specific Discharge [mm/day]'].notna())
+        if decade_start:
+            mask &= b.hydrodata['Date'] >= pd.Timestamp(decade_start)
+        if decade_end_nominal:
+            mask &= b.hydrodata['Date'] <= pd.Timestamp(decade_end_nominal)
         m    = b.hydrodata.loc[mask, 'Specific Discharge (modeled) [mm/day]'].values
         o    = b.hydrodata.loc[mask, 'Specific Discharge [mm/day]'].values
 
