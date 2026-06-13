@@ -1,8 +1,9 @@
 #!/bin/bash
-# Usage: bash archive_run.sh <run-name>
+# Usage: bash archive_run.sh <decade-dir> <run-name>
+# e.g.:  bash archive_run.sh decades/1911-1920 2026-06-14_083000_full
 #
 # Copies the configuration and outputs of the current Dakota run into
-# runs/<run-name>/ for version-controlled storage.
+# <decade-dir>/runs/<run-name>/ for version-controlled storage.
 #
 # Files archived:
 #   dakota.in, driver.py, params.yml, run_driver.sh  -- exact config
@@ -13,8 +14,9 @@
 
 set -euo pipefail
 
-NAME="${1:?Usage: bash archive_run.sh <run-name>}"
-DEST="runs/${NAME}"
+DECADE_DIR="${1:?Usage: bash archive_run.sh <decade-dir> <run-name>}"
+NAME="${2:?}"
+DEST="${DECADE_DIR}/runs/${NAME}"
 
 if [[ -d "$DEST" ]]; then
     echo "Error: $DEST already exists. Choose a different name." >&2
@@ -23,21 +25,23 @@ fi
 
 mkdir -p "$DEST"
 
-# Resolve config template from params.yml
+PARAMS="${DECADE_DIR}/params.yml"
+
+# Resolve config template from this decade's params.yml
 CONFIG=$(python3 -c "
 import yaml
-with open('params.yml') as f:
+with open('${PARAMS}') as f:
     cfg = yaml.safe_load(f)
 print(cfg['driver']['config_template'])
 ")
 
-cp dakota.in              "$DEST/"
-cp driver.py              "$DEST/"
-cp params.yml             "$DEST/"
-cp run_driver.sh          "$DEST/"
-cp "$CONFIG"              "$DEST/"
-cp dakota.dat             "$DEST/evaluations.dat"
-cp dakota.out             "$DEST/dakota_log.txt"
+cp dakota.in       "$DEST/"
+cp driver.py       "$DEST/"
+cp "$PARAMS"       "$DEST/params.yml"
+cp run_driver.sh   "$DEST/"
+cp "$CONFIG"       "$DEST/"
+cp dakota.dat      "$DEST/evaluations.dat"
+cp dakota.out      "$DEST/dakota_log.txt"
 [[ -f best_fit.png ]] && cp best_fit.png "$DEST/"
 
 N=$(( $(wc -l < "$DEST/evaluations.dat") - 1 ))
