@@ -35,11 +35,7 @@ from hydroravens.calibration import _nse, _kge, _log_kge, _kge_logfdc
 warnings.filterwarnings('ignore', message=r"enforce_water_balance='none'",
                         category=UserWarning)
 
-try:
-    with open('params.yml') as _f:
-        CFG_TEMPLATE = yaml.safe_load(_f)['driver']['config_template']
-except (FileNotFoundError, KeyError):
-    CFG_TEMPLATE = 'cannon_cfg_template.yml'
+CFG_TEMPLATE = None  # set in __main__ from --params after arg parsing
 
 OBJECTIVE_COL = 'neg_kge'
 ROUTING_N     = 2      # Nash-cascade shape; must match driver.py
@@ -422,6 +418,9 @@ if __name__ == '__main__':
     (METRIC, MODULES, _PARAMS,
      RESERVOIR_ORDER, _FIXED_RECESSION,
      ENFORCE_WB, SPIN_UP_CYCLES) = _load_params_yml(args.params)
+
+    with open(args.params) as _pf:
+        CFG_TEMPLATE = yaml.safe_load(_pf)['driver']['config_template']
 
     # Data-driven initial reservoir states — mirrors driver.py exactly
     cfg_path   = Path(CFG_TEMPLATE)

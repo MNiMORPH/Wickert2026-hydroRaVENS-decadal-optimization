@@ -75,6 +75,9 @@ fi
 # Archive into the decade directory
 bash archive_run.sh "$DECADE_DIR" "$RUN_NAME"
 
+# Clean up ephemeral outputs so the next run.sh call starts clean
+rm -rf out dakota.dat dakota.out dakota.rst fort.13 LHS_*.out best_fit.png
+
 echo "=== Archived to ${DECADE_DIR}/runs/${RUN_NAME} ==="
 
 [[ -f "${DECADE_DIR}/runs/${RUN_NAME}/best_fit.png" ]] && xdg-open "${DECADE_DIR}/runs/${RUN_NAME}/best_fit.png" &
