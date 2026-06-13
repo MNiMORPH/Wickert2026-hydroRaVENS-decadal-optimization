@@ -17,6 +17,9 @@ PYTHON=/home/awickert/anaconda3/envs/dakota-env/bin/python
 
 echo "=== Run: $RUN_NAME ==="
 
+# Regenerate dakota.in from params.yml to keep them in sync
+$PYTHON generate_dakota_in.py
+
 # Clean previous ephemeral outputs
 rm -rf out dakota.dat dakota.out dakota.rst fort.13 LHS_*.out
 
