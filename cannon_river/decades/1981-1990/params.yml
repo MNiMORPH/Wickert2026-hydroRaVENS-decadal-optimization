@@ -1,6 +1,6 @@
 # 1981-1990: independent calibration, 1981-01-01 to 1990-12-31.
 # Model structure and initial parameter values from A02 best-fit
-# (3-res soil/intermediate/deep, frozen ground, snow insulation, k=9).
+# (3-res soil/intermediate/deep, frozen ground, k=8).
 # decade_start/decade_end slice the full 1893-2024 forcing at runtime.
 
 modules:
@@ -105,12 +105,12 @@ parameters:
     active:  true
 
   snow_insulation_k:
-    description: "snow insulation decay constant [mm⁻¹ SWE]; T_eff = T·exp(-k·SWE)"
+    description: "snow insulation decay constant [mm⁻¹ SWE] — fixed at 0 (no insulation)"
     lower:   0.0
-    upper:   1.0
-    initial: 0.057
+    upper:   0.5
+    initial: 0.0
     fixed:   0.0
-    active:  true
+    active:  false
 
   et_scale:
     description: "global ET multiplier — inactive (water balance enforced globally)"
