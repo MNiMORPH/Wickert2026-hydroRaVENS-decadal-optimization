@@ -24,6 +24,8 @@ from pathlib import Path
 import yaml
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from hydroravens import HydrographSeparation, run_and_score
@@ -414,7 +416,7 @@ if __name__ == '__main__':
     parser.add_argument('--dat',     default='dakota.dat',   help='Dakota tabular data file')
     parser.add_argument('--save',    default='best_fit.png', help='Output figure path')
     parser.add_argument('--params',  default='params.yml',   help='params.yml config file')
-    parser.add_argument('--no-show', action='store_true',    help='Save only; skip plt.show()')
+    parser.add_argument('--no-show', action='store_true',    help='(ignored; plot is never shown)')
     args = parser.parse_args()
 
     (METRIC, MODULES, _PARAMS,
@@ -520,5 +522,3 @@ if __name__ == '__main__':
     print(f'  BFI mod          = {result.bfi_mod:.4f}')
 
     make_plot(result, best, save_path=args.save)
-    if not args.no_show:
-        plt.show()
