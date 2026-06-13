@@ -53,6 +53,40 @@ if 'KGE' in df.columns:
     reliable &= (df['KGE'].fillna(-9) >= args.min_kge)
 
 # ---------------------------------------------------------------------------
+# Derived columns: mean residence time MRT = τ^(1/b) at Q_ref = 1 mm/day
+#
+# Exact form: MRT = τ^(1/b) / Q_ref^(1 - 1/b)
+# At Q_ref = 1 mm/day this simplifies to τ^(1/b), a parameter-only
+# composite that collapses the τ/b degeneracy without external data.
+# For b = 1 (linear) MRT = τ exactly.
+# ---------------------------------------------------------------------------
+
+def _mrt(tau_col, b_col, b_fixed=None):
+    tau = 10 ** df[tau_col].astype(float)
+    b   = (df[b_col].astype(float) if b_col in df.columns
+           else pd.Series(b_fixed, index=df.index))
+    return tau ** (1.0 / b)
+
+if 'param_log__t_recession_soil' in df.columns:
+    b_col = ('param_recession_b_soil'
+             if 'param_recession_b_soil' in df.columns else None)
+    b_fix = 1.0 if b_col is None else None
+    df['mrt_soil'] = _mrt('param_log__t_recession_soil', b_col or '', b_fixed=b_fix)
+
+if 'param_log__t_recession_intermediate' in df.columns:
+    b_col = ('param_recession_b_intermediate'
+             if 'param_recession_b_intermediate' in df.columns else None)
+    b_fix = 2.203 if b_col is None else None   # Brutsaert-Nieber fixed value
+    df['mrt_intermediate'] = _mrt('param_log__t_recession_intermediate',
+                                  b_col or '', b_fixed=b_fix)
+
+if 'param_log__t_recession_deep' in df.columns:
+    b_col = ('param_recession_b_deep'
+             if 'param_recession_b_deep' in df.columns else None)
+    b_fix = 1.0 if b_col is None else None
+    df['mrt_deep'] = _mrt('param_log__t_recession_deep', b_col or '', b_fixed=b_fix)
+
+# ---------------------------------------------------------------------------
 # Panel definitions
 # ---------------------------------------------------------------------------
 
@@ -60,26 +94,33 @@ if 'KGE' in df.columns:
 PANELS = [
     # --- fit quality ---
     ('KGE',       'KGE',          None,           'KGE [ ]',            None),
-    ('pct_data',  'Data coverage','None',          'Coverage [%]',       None),
+    ('pct_data',  'Data coverage', None,            'Coverage [%]',       None),
 
-    # --- recession time scales (log-transformed in params) ---
-    ('param_log__t_recession_soil',
-     'τ soil',
-     lambda x: 10**x,
-     'τ soil [days]',
-     'soil-zone recession'),
+    # --- mean residence times (nonlinearity-corrected) ---
+    ('mrt_soil',
+     'MRT soil',
+     None,
+     'MRT soil [days]',
+     'τ_soil^(1/b_soil)  — soil-zone residence time'),
 
-    ('param_log__t_recession_intermediate',
-     'τ intermediate',
-     lambda x: 10**x,
-     'τ intermediate [days]',
-     'intermediate recession — tile-drain signal'),
+    ('mrt_intermediate',
+     'MRT intermediate',
+     None,
+     'MRT intermediate [days]',
+     'τ_int^(1/b_int)  — tile-drain signal'),
 
-    ('param_log__t_recession_deep',
-     'τ deep',
-     lambda x: 10**x,
-     'τ deep [days]',
-     'deep groundwater recession'),
+    ('mrt_deep',
+     'MRT deep',
+     None,
+     'MRT deep [days]',
+     'τ_deep^(1/b_deep)  — deep groundwater'),
+
+    # --- recession exponents ---
+    ('param_recession_b_soil',
+     'Recession b (soil)',
+     None,
+     'Recession exponent b [ ]',
+     'nonlinearity of soil drainage'),
 
     # --- exfiltration fractions ---
     ('param_f_exfiltration_soil',
@@ -106,13 +147,6 @@ PANELS = [
      lambda x: 10**x,
      'FDD threshold [°C·day]',
      'frozen-ground infiltration block'),
-
-    # --- recession non-linearity ---
-    ('param_recession_b_soil',
-     'recession b (soil)',
-     None,
-     'Recession b soil [ ]',
-     'power-law exponent'),
 ]
 
 # Keep only panels whose column exists in the CSV
