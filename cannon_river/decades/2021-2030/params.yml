@@ -1,4 +1,5 @@
-# 1893-1900: independent calibration, 1893-01-01 to 1900-12-31.
+# 2021-2030: independent calibration, 2021-01-01 to 2024-12-31 (partial: ~4 years).
+# Record ends 2024; decade_end should be updated as new data become available.
 # Model structure and initial parameter values from A02 best-fit
 # (3-res soil/intermediate/deep, frozen ground, k=8).
 # decade_start/decade_end slice the full 1893-2024 forcing at runtime.
@@ -26,8 +27,8 @@ driver:
   routing_N:             2
   n_reservoirs:          3
   reservoir_order:       ['soil', 'intermediate', 'deep']
-  decade_start:          '1893-01-01'
-  decade_end:            '1900-12-31'
+  decade_start:          '2021-01-01'
+  decade_end:            '2024-12-31'
   enforce_water_balance: 'global'
 
 parameters:
