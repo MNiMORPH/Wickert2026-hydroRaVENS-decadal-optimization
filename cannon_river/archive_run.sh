@@ -5,10 +5,11 @@
 # runs/<run-name>/ for version-controlled storage.
 #
 # Files archived:
-#   dakota.in, driver.py, cannon_cfg_template.yml, run_driver.sh  -- exact config
-#   evaluations.dat  (dakota.dat renamed to dodge .gitignore)      -- all evaluations
-#   dakota_log.txt   (dakota.out renamed)                          -- Dakota log
-#   best_fit.png     if present                                    -- diagnostic plot
+#   dakota.in, driver.py, params.yml, run_driver.sh  -- exact config
+#   <config_template>  (resolved from params.yml)    -- hydroRaVENS config
+#   evaluations.dat  (dakota.dat renamed)            -- all evaluations
+#   dakota_log.txt   (dakota.out renamed)            -- Dakota log
+#   best_fit.png     if present                      -- diagnostic plot
 
 set -euo pipefail
 
@@ -22,10 +23,19 @@ fi
 
 mkdir -p "$DEST"
 
+# Resolve config template from params.yml
+CONFIG=$(python3 -c "
+import yaml
+with open('params.yml') as f:
+    cfg = yaml.safe_load(f)
+print(cfg['driver']['config_template'])
+")
+
 cp dakota.in              "$DEST/"
 cp driver.py              "$DEST/"
-cp cannon_cfg_template.yml "$DEST/"
+cp params.yml             "$DEST/"
 cp run_driver.sh          "$DEST/"
+cp "$CONFIG"              "$DEST/"
 cp dakota.dat             "$DEST/evaluations.dat"
 cp dakota.out             "$DEST/dakota_log.txt"
 [[ -f best_fit.png ]] && cp best_fit.png "$DEST/"
