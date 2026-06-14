@@ -14,7 +14,7 @@ set -euo pipefail
 OVERWRITE=""
 [[ "${1:-}" == "--overwrite" ]] && OVERWRITE="--overwrite"
 
-PYTHON=/home/awickert/anaconda3/envs/dakota-env/bin/python
+PYTHON=${PYTHON:-python}
 
 for decade_dir in $(ls -d decades/*/); do
     bash run.sh $OVERWRITE "$decade_dir"

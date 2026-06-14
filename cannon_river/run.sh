@@ -31,8 +31,8 @@ DECADE_NAME=$(basename "$DECADE_DIR")
 TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
 RUN_NAME="${TIMESTAMP}_${DESC}"
 
-DAKOTA=/home/awickert/anaconda3/envs/dakota-env/bin/dakota
-PYTHON=/home/awickert/anaconda3/envs/dakota-env/bin/python
+DAKOTA=${DAKOTA:-dakota}
+PYTHON=${PYTHON:-python}
 
 PARAMS="${DECADE_DIR}/params.yml"
 
