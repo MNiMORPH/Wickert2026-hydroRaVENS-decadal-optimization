@@ -325,7 +325,6 @@ v.in.ghcn \\
     elements=PRCP,TMAX,TMIN \\
     start_date=$START \\
     end_date=$END \\
-    min_years=10 \\
     min_stations=4 \\
     granularity=10 \\
     domain={name}_basin
