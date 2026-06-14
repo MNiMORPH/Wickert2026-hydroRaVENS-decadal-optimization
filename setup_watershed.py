@@ -318,13 +318,16 @@ v.in.waterdata \\
 g.region vector={name}_basin res=1000 -a
 
 # ── 3. GHCN station import ────────────────────────────────────────────────────
+# sample= ensures the bbox expands until the basin centroid falls inside the
+# convex hull of stations for each element, guaranteeing true spatial enclosure.
 v.in.ghcn \\
     output=ghcn_stations \\
     elements=PRCP,TMAX,TMIN \\
     start_date=$START \\
     end_date=$END \\
     min_years=10 \\
-    min_stations=4
+    min_stations=4 \\
+    sample={name}_basin
 
 echo "Download complete. Transfer the GRASS mapset to MSI, then run:"
 echo "  {name}_pipeline_compute.sh"
