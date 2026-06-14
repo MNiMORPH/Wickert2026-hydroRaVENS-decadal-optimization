@@ -181,7 +181,13 @@ try:
     )
     neg_score = 1.0 - result.score if np.isfinite(result.score) else PENALTY
 
-except Exception:
+except Exception as _e:
+    # Re-raise structural errors (bad config key, missing file, wrong type) so
+    # they surface immediately with a real traceback and Dakota aborts — rather
+    # than silently returning PENALTY for every one of 500+ evaluations.
+    if isinstance(_e, (KeyError, AttributeError, FileNotFoundError,
+                        ImportError, TypeError)):
+        raise
     neg_score = PENALTY
 
 results['neg_kge'].function = neg_score
