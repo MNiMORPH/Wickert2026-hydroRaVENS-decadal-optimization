@@ -1,4 +1,18 @@
-# Byte-compiled / optimized / DLL files
+# ── Study outputs (large, machine-generated) ──────────────────────────────────
+# Per-decade Dakota archives (can be large; canonical outputs are summary.csv)
+*/decades/*/runs/
+# Per-watershed results and logs
+*/summary.csv
+*/trends.png
+*/run_all.log
+*_pipeline.log
+# SLURM log directory
+logs/
+# Forcing data backups and the embedded pipeline-repo clone
+centroid_forcing_backup/
+db.out.hydroravens/
+
+# ── Byte-compiled / optimized / DLL files ─────────────────────────────────────
 __pycache__/
 *.py[codz]
 *$py.class
