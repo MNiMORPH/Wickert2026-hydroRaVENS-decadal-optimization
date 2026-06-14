@@ -62,8 +62,40 @@ echo "=== Run: ${DECADE_NAME} / ${RUN_NAME} ==="
 # Regenerate dakota.in from this decade's params.yml
 $PYTHON generate_dakota_in.py --params "$PARAMS"
 
+# Pre-flight: initialise the model with the config template before spending
+# 500+ evaluations — catches config errors (missing keys, bad paths) immediately.
+$PYTHON -c '
+import yaml, sys
+from hydroravens import Buckets
+with open("params.yml") as f:
+    p = yaml.safe_load(f)
+cfg = p["driver"]["config_template"]
+b = Buckets()
+b.initialize(cfg)
+' || { echo "ERROR: Pre-flight config check failed. Aborting." >&2; exit 1; }
+
 # Optimise
 $DAKOTA -i dakota.in -o dakota.out
+
+# Abort before archiving if every evaluation returned the penalty score —
+# indicates a model or config error rather than a genuine calibration result.
+$PYTHON -c '
+import sys
+PENALTY = 10.0
+with open("dakota.dat") as f:
+    lines = f.readlines()
+hdr = next((l.lstrip("%").split() for l in lines if l.startswith("%")), [])
+if "neg_kge" not in hdr:
+    sys.exit(0)
+col = hdr.index("neg_kge")
+scores = [float(l.split()[col]) for l in lines
+          if not l.startswith("%") and l.strip()]
+if scores and all(abs(s - PENALTY) < 1e-9 for s in scores):
+    n = len(scores)
+    print(f"ERROR: all {n} evaluations returned PENALTY={PENALTY}; "
+          "model or config error. Aborting without archiving.", file=sys.stderr)
+    sys.exit(1)
+' || exit 1
 
 # Save figure
 if $PYTHON plot_best.py --params "$PARAMS" --save best_fit.png --no-show; then
