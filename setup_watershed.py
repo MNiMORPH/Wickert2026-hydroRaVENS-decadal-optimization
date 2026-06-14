@@ -327,7 +327,7 @@ v.in.ghcn \\
     end_date=$END \\
     min_years=10 \\
     min_stations=4 \\
-    sample={name}_basin
+    domain={name}_basin
 
 echo "Download complete. Transfer the GRASS mapset to MSI, then run:"
 echo "  {name}_pipeline_compute.sh"
@@ -368,7 +368,7 @@ for ELEM in PRCP TMAX TMIN; do
         element=$ELEM \\
         method=idw \\
         min_stations=2 \\
-        sample={name}_basin \\
+        domain={name}_basin \\
         start_date=$START \\
         end_date=$END \\
         -f
