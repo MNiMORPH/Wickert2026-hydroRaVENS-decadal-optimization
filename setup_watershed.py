@@ -325,7 +325,7 @@ v.in.ghcn \\
     elements=PRCP,TMAX,TMIN \\
     start_date=$START \\
     end_date=$END \\
-    granularity=10 \\
+    min_coverage=0.1 \\
     domain={name}_basin
 
 echo "Download complete. Transfer the GRASS mapset to MSI, then run:"
