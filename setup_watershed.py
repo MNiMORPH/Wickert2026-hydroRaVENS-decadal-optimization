@@ -23,8 +23,8 @@ from pathlib import Path
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', required=True, help='Watershed config YAML')
-parser.add_argument('--template-dir', default='cannon_river',
-                    help='Source directory for scripts (default: cannon_river)')
+parser.add_argument('--template-dir', default='templates',
+                    help='Source directory for scripts (default: templates/)')
 args = parser.parse_args()
 
 with open(args.config) as f:
@@ -73,10 +73,8 @@ for fname in GENERIC_SCRIPTS:
 for fname in TITLE_SCRIPTS:
     src = TEMPLATE_DIR / fname
     text = src.read_text()
-    # Substitute every occurrence of "Cannon River" with the watershed title,
-    # and the usage doc path "cannon_river/" with the new directory name.
-    text = text.replace('Cannon River', title)
-    text = text.replace('cannon_river/', f'{name}/')
+    text = text.replace('WATERSHED_TITLE', title)
+    text = text.replace('WATERSHED_NAME', name)
     dst = STUDY_DIR / fname
     dst.write_text(text)
     dst.chmod(dst.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP)
