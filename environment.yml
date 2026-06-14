@@ -1,0 +1,18 @@
+name: dakota-env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - conda-forge::dakota
+  - pyyaml
+  - numpy
+  - pandas
+  - scipy
+  - matplotlib
+  - pip
+  - pip:
+    # Install hydroRaVENS from local clone (editable) or from GitHub:
+    #   pip install -e /path/to/hydroRaVENS        (local dev)
+    #   pip install git+https://github.com/awickert/hydroRaVENS.git  (MSI)
+    - hydroRaVENS
