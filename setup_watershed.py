@@ -45,7 +45,7 @@ params0       = cfg['initial_params']
 
 TEMPLATE_DIR = Path(args.template_dir)
 STUDY_DIR    = Path(name)
-EXAMPLES_DIR = Path('db.out.hydroravens/examples') / name
+EXAMPLES_DIR = Path('forcing') / name
 
 # ---------------------------------------------------------------------------
 # 1. Study directory + scripts

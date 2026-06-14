@@ -8,9 +8,9 @@
 *_pipeline.log
 # SLURM log directory
 logs/
-# Forcing data backups and the embedded pipeline-repo clone
+# Forcing data and generated pipeline scripts (large, machine-generated)
 centroid_forcing_backup/
-db.out.hydroravens/
+forcing/
 
 # ── Byte-compiled / optimized / DLL files ─────────────────────────────────────
 __pycache__/
