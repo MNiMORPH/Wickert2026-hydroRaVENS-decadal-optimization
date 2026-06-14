@@ -327,6 +327,7 @@ v.in.ghcn \\
     end_date=$END \\
     min_years=10 \\
     min_stations=4 \\
+    granularity=10 \\
     domain={name}_basin
 
 echo "Download complete. Transfer the GRASS mapset to MSI, then run:"
