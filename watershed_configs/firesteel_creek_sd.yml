@@ -1,0 +1,32 @@
+# Firesteel Creek near Mount Vernon, SD (USGS 06477500)
+# Drainage area: ~588 sq mi
+# Discharge record: peaks from 1956
+# Agricultural pothole prairie, E. SD — James River tributary; small western anchor
+# Note: same pothole-connectivity caveat as Elm River; only 6-7 clean decades available
+# UTM Zone 14N (EPSG:32614) — site at ~98.3°W
+
+name:  firesteel_creek_sd
+gauge: "06477500"
+title: "Firesteel Creek (SD)"
+grass_location: FiresteelCreekSD
+grass_epsg: 32614
+
+forcing:
+  start:       '1950-01-01'
+  end:         '2024-12-31'
+  csv_name:    firesteel_forcing.csv
+  config_name: firesteel_config_1950_2024.yml
+
+decades:
+  first_year: 1961
+  last_year:  2021
+
+initial_params:
+  log__t_recession_soil:         4.493
+  log__t_recession_intermediate: 1.021
+  log__t_recession_deep:         3.771
+  f_exfiltration_soil:           0.6662
+  f_exfiltration_intermediate:   0.0120
+  PDD_melt_factor:               7.8611
+  recession_b_soil:              5.4907
+  log__fdd_threshold:            2.502

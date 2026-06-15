@@ -1,0 +1,31 @@
+# Kickapoo River at La Farge, WI (USGS 05408000)
+# Drainage area: ~266 sq mi
+# Discharge record: peaks from 1939
+# Driftless Area, SW WI — highly sinuous karst/forested watershed; natural reference
+# Note: karst conduit flow may challenge the standard 3-reservoir structure
+
+name:  kickapoo_river
+gauge: "05408000"
+title: "Kickapoo River"
+grass_location: KickapooRiver
+grass_epsg: 32615
+
+forcing:
+  start:       '1933-01-01'
+  end:         '2024-12-31'
+  csv_name:    kickapoo_forcing.csv
+  config_name: kickapoo_config_1933_2024.yml
+
+decades:
+  first_year: 1941
+  last_year:  2021
+
+initial_params:
+  log__t_recession_soil:         4.493
+  log__t_recession_intermediate: 1.021
+  log__t_recession_deep:         3.771
+  f_exfiltration_soil:           0.6662
+  f_exfiltration_intermediate:   0.0120
+  PDD_melt_factor:               7.8611
+  recession_b_soil:              5.4907
+  log__fdd_threshold:            2.502

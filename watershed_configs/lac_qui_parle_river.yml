@@ -1,0 +1,30 @@
+# Lac qui Parle River near Lac qui Parle, MN (USGS 05300000)
+# Drainage area: ~960 sq mi
+# Discharge record: peaks from 1911
+# Agricultural land use, western MN — western Mississippi-drainage anchor near SD border
+
+name:  lac_qui_parle_river
+gauge: "05300000"
+title: "Lac qui Parle River"
+grass_location: LacQuiParleRiver
+grass_epsg: 32615
+
+forcing:
+  start:       '1905-01-01'
+  end:         '2024-12-31'
+  csv_name:    lac_qui_parle_forcing.csv
+  config_name: lac_qui_parle_config_1905_2024.yml
+
+decades:
+  first_year: 1911
+  last_year:  2021
+
+initial_params:
+  log__t_recession_soil:         4.493
+  log__t_recession_intermediate: 1.021
+  log__t_recession_deep:         3.771
+  f_exfiltration_soil:           0.6662
+  f_exfiltration_intermediate:   0.0120
+  PDD_melt_factor:               7.8611
+  recession_b_soil:              5.4907
+  log__fdd_threshold:            2.502

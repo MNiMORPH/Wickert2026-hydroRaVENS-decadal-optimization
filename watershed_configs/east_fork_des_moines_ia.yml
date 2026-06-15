@@ -1,0 +1,31 @@
+# East Fork Des Moines River at Dakota City, IA (USGS 05479000)
+# Drainage area: ~306 sq mi
+# Discharge record: peaks from 1938
+# Small, flat, heavily tile-drained prairie; southern Iowa anchor
+# Note: small basin may show stronger per-unit tile-drain signal
+
+name:  east_fork_des_moines_ia
+gauge: "05479000"
+title: "East Fork Des Moines River (IA)"
+grass_location: EastForkDesMoinesIA
+grass_epsg: 32615
+
+forcing:
+  start:       '1932-01-01'
+  end:         '2024-12-31'
+  csv_name:    east_fork_des_moines_ia_forcing.csv
+  config_name: east_fork_des_moines_ia_config_1932_2024.yml
+
+decades:
+  first_year: 1931
+  last_year:  2021
+
+initial_params:
+  log__t_recession_soil:         4.493
+  log__t_recession_intermediate: 1.021
+  log__t_recession_deep:         3.771
+  f_exfiltration_soil:           0.6662
+  f_exfiltration_intermediate:   0.0120
+  PDD_melt_factor:               7.8611
+  recession_b_soil:              5.4907
+  log__fdd_threshold:            2.502

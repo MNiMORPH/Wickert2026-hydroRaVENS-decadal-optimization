@@ -1,0 +1,30 @@
+# Black River at Neillsville, WI (USGS 05381000)
+# Drainage area: ~749 sq mi
+# Discharge record: peaks from 1905
+# Forested, W. WI — longest-record small WI basin; natural/forested reference
+
+name:  black_river_wi
+gauge: "05381000"
+title: "Black River (WI)"
+grass_location: BlackRiverWI
+grass_epsg: 32615
+
+forcing:
+  start:       '1900-01-01'
+  end:         '2024-12-31'
+  csv_name:    black_river_wi_forcing.csv
+  config_name: black_river_wi_config_1900_2024.yml
+
+decades:
+  first_year: 1901
+  last_year:  2021
+
+initial_params:
+  log__t_recession_soil:         4.493
+  log__t_recession_intermediate: 1.021
+  log__t_recession_deep:         3.771
+  f_exfiltration_soil:           0.6662
+  f_exfiltration_intermediate:   0.0120
+  PDD_melt_factor:               7.8611
+  recession_b_soil:              5.4907
+  log__fdd_threshold:            2.502

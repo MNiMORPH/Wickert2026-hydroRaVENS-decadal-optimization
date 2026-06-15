@@ -1,0 +1,28 @@
+# Cannon River near Red Wing, MN (USGS 05355200)
+# Reference config — directory already set up manually.
+
+name:  cannon_river
+gauge: "05355200"
+title: "Cannon River"
+grass_location: CannonRiver
+
+forcing:
+  start:       '1890-01-01'
+  end:         '2024-12-31'
+  csv_name:    cannon_forcing.csv
+  config_name: cannon_config_1893_2024.yml
+
+decades:
+  first_year: 1891
+  last_year:  2021
+
+# A02 best-fit parameter values (used as warm-start for all decades)
+initial_params:
+  log__t_recession_soil:         4.493
+  log__t_recession_intermediate: 1.021
+  log__t_recession_deep:         3.771
+  f_exfiltration_soil:           0.6662
+  f_exfiltration_intermediate:   0.0120
+  PDD_melt_factor:               7.8611
+  recession_b_soil:              5.4907
+  log__fdd_threshold:            2.502

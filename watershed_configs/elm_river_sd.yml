@@ -1,0 +1,33 @@
+# Elm River at Westport, SD (USGS 06471500)
+# Drainage area: ~1,505 sq mi
+# Discharge record: peaks from 1946
+# Agricultural pothole prairie, E. SD — James River tributary; western anchor
+# Note: variable effective drainage area (pothole connectivity) is a structural challenge;
+#       tile-drainage expansion has progressively connected endorheic sub-basins.
+# UTM Zone 14N (EPSG:32614) — site at ~98.5°W
+
+name:  elm_river_sd
+gauge: "06471500"
+title: "Elm River (SD)"
+grass_location: ElmRiverSD
+grass_epsg: 32614
+
+forcing:
+  start:       '1940-01-01'
+  end:         '2024-12-31'
+  csv_name:    elm_river_sd_forcing.csv
+  config_name: elm_river_sd_config_1940_2024.yml
+
+decades:
+  first_year: 1951
+  last_year:  2021
+
+initial_params:
+  log__t_recession_soil:         4.493
+  log__t_recession_intermediate: 1.021
+  log__t_recession_deep:         3.771
+  f_exfiltration_soil:           0.6662
+  f_exfiltration_intermediate:   0.0120
+  PDD_melt_factor:               7.8611
+  recession_b_soil:              5.4907
+  log__fdd_threshold:            2.502
