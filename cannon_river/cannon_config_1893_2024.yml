@@ -1,54 +1,43 @@
-# cannon_config_1893_2024.yml
-# 3-reservoir hydroRaVENS config: soil + intermediate + deep.
-# Extended-record version: forcing from v.in.ghcn + v.interp.timeseries,
-# 1893-01-01 to 2024-12-31 (Cannon River near Red Wing, USGS 05355200).
-#
-# Physical parameters overridden by Dakota driver after initialization.
-# Basin area from v.in.waterdata polygon, not the rounded 3800 km² estimate.
-
 timeseries:
-  datafile: /home/awickert/dataanalysis/db.out.hydroravens/examples/cannon_river/cannon_forcing.csv
+  datafile: /home/awickert/dataanalysis/Wickert2026-hydroRaVENS-decadal-optimization/forcing/cannon_river/cannon_forcing.csv
 
 initial_conditions:
   water_reservoir_effective_depths__mm:
-    - 100     # soil-zone reservoir     (overridden by HydrographSeparation init)
-    - 2000    # intermediate reservoir  (overridden by HydrographSeparation init)
-    - 50000   # deep groundwater        (overridden by HydrographSeparation init)
+    - 1.0       # shallow / overland-flow reservoir
+    - 100.0     # soil-zone reservoir
+    - 1000.0    # deep / karst reservoir
   snowpack__mm_SWE: 0
 
 catchment:
   drainage_basin_area__km2: 3474.9
   evapotranspiration_method: ThorntwaiteChang2019
   water_year_start_month: 10
-  baseflow_Q: 0.0             # mm/day; overridden by driver
+  baseflow_Q: 0.0
 
 general:
-  spin_up_cycles: 0  # driver.py performs spin-up after setting calibrated parameters
-  et_alpha: 1.0      # all ET from soil reservoir (first); overridden by driver
+  spin_up_cycles: 1
 
 reservoirs:
   recession_timescales__days:
-    - 200      # soil zone            (placeholder; overridden by driver)
-    - 3650     # intermediate         (placeholder; overridden by driver)
-    - 100000   # deep gw              (placeholder; overridden by driver)
+    - 16       # shallow (placeholder — calibrate)
+    - 200      # soil zone (placeholder — calibrate)
+    - 3650     # deep / karst (placeholder — calibrate)
   exfiltration_fractions:
-    - 0.1     # soil: fraction to stream vs. recharging intermediate (overridden)
-    - 0.7     # intermediate: fraction to stream vs. recharging deep  (overridden)
-    - 1.0     # deep: deepest layer, must be 1.0 for mass conservation
+    - 0.8      # shallow: fraction to stream vs. percolation to soil zone
+    - 0.1      # soil zone: fraction to stream vs. deep recharge
+    - 1.0      # deep: all to stream (mass conservation)
   maximum_effective_depths__mm:
-    - .inf    # soil: no saturation-excess threshold
-    - .inf    # intermediate: no saturation-excess threshold
-    - .inf    # deep: no saturation-excess threshold
+    - .inf
+    - .inf
+    - .inf
 
 snowmelt:
-  PDD_melt_factor: 1.0   # mm SWE per positive degC per day (placeholder; overridden)
-  fgi_decay_coeff: 1.0   # no passive decay; FGI driven by temperature only
-  snow_insulation_k: 0.0 # mm⁻¹ SWE; 0 = no insulation
+  PDD_melt_factor: 3.0   # mm SWE per positive degC per day (placeholder)
+  fgi_decay_coeff: 0.97
+  snow_insulation_k: 0.0
 
 modules:
-  snowpack:          true
-  frozen_ground:     false
-  rain_on_snow:      true
-  direct_runoff:     false
-  dtr_fgi_decay:     false
-  et_reservoir_draw: true
+  snowpack: true
+  frozen_ground: true
+  rain_on_snow: true
+  direct_runoff: false
