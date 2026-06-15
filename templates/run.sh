@@ -36,6 +36,29 @@ PYTHON=${PYTHON:-python}
 
 PARAMS="${DECADE_DIR}/params.yml"
 
+# --- skip decades with no discharge observations in their window ---
+N_OBS=$($PYTHON -c "
+import yaml, pandas as pd, sys
+try:
+    with open('$PARAMS') as f:
+        cfg = yaml.safe_load(f)
+    drv = cfg['driver']
+    with open(drv['config_template']) as f:
+        mcfg = yaml.safe_load(f)
+    df = pd.read_csv(mcfg['timeseries']['datafile'], parse_dates=['Date'])
+    q = 'Discharge [m^3/s]'
+    t0 = pd.Timestamp(drv.get('decade_start', str(df['Date'].min())))
+    t1 = pd.Timestamp(drv.get('decade_end', str(df['Date'].max())))
+    n = int(df[(df['Date'] >= t0) & (df['Date'] <= t1) & df[q].notna()].shape[0])
+    print(n)
+except Exception:
+    print(0)
+" 2>/dev/null || echo 0)
+if [[ "${N_OBS:-0}" -eq 0 ]]; then
+    echo "=== Skipping ${DECADE_NAME}: no discharge observations in decade window ==="
+    exit 0
+fi
+
 # --- check for leftover outputs ---
 EXISTING=()
 for item in dakota.dat dakota.out dakota.rst fort.13 out best_fit.png; do
