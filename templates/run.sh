@@ -93,8 +93,9 @@ from hydroravens import Buckets
 with open(sys.argv[1]) as f:
     p = yaml.safe_load(f)
 cfg = p["driver"]["config_template"]
+ewb = p["driver"].get("enforce_water_balance", None)
 b = Buckets()
-b.initialize(cfg)
+b.initialize(cfg, enforce_water_balance=ewb)
 PYEOF
 
 # Optimise
