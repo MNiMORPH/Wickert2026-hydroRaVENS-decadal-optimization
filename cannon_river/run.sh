@@ -87,15 +87,15 @@ $PYTHON generate_dakota_in.py --params "$PARAMS"
 
 # Pre-flight: initialise the model with the config template before spending
 # 500+ evaluations — catches config errors (missing keys, bad paths) immediately.
-$PYTHON -c '
+$PYTHON - "$PARAMS" << 'PYEOF' || { echo "ERROR: Pre-flight config check failed. Aborting." >&2; exit 1; }
 import yaml, sys
 from hydroravens import Buckets
-with open("params.yml") as f:
+with open(sys.argv[1]) as f:
     p = yaml.safe_load(f)
 cfg = p["driver"]["config_template"]
 b = Buckets()
 b.initialize(cfg)
-' || { echo "ERROR: Pre-flight config check failed. Aborting." >&2; exit 1; }
+PYEOF
 
 # Optimise
 $DAKOTA -i dakota.in -o dakota.out
