@@ -10,7 +10,11 @@
 logs/
 # Forcing data and generated pipeline scripts (large, machine-generated)
 centroid_forcing_backup/
+centroid_calib_backup/
 forcing/
+# Generated Dakota input file (recreated each run by generate_dakota_in.py)
+*/dakota.in
+dakota.in
 
 # ── Byte-compiled / optimized / DLL files ─────────────────────────────────────
 __pycache__/
