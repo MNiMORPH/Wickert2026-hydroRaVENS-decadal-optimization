@@ -56,7 +56,7 @@ STUDY_DIR.mkdir(exist_ok=True)
 # Scripts that need no changes at all
 GENERIC_SCRIPTS = [
     'run.sh', 'run_all_decades.sh', 'archive_run.sh',
-    'driver.py', 'run_driver.sh',
+    'driver.py', 'run_driver.sh', 'warm_start.py',
 ]
 # Scripts that contain "Cannon River" in titles / docstrings
 TITLE_SCRIPTS = [
