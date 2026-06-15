@@ -83,6 +83,29 @@ def _pdm_list():
     return vals if any(v is not None for v in vals) else None
 
 
+def _post_spinup_hwater():
+    """Return post-spin-up Hwater overrides and active parameter count.
+
+    Reads log__H0_{label} for each reservoir.  Returns (dict, k) where dict
+    has key 'reservoirs' (list, None entries leave that reservoir at its
+    spin-up end state) and k is the number of active parameters.  Returns
+    (None, 0) if no log__H0_{label} keys are present in params.yml.
+    """
+    names = [f'log__H0_{l}' for l in RESERVOIR_ORDER]
+    if not any(n in _param_cfg for n in names):
+        return None, 0
+    vals = []
+    k = 0
+    for n in names:
+        if n in _param_cfg:
+            vals.append(10 ** get(n))
+            if _param_cfg[n].get('active', False):
+                k += 1
+        else:
+            vals.append(None)
+    return {'reservoirs': vals}, k
+
+
 def _tile_list():
     names = [f'f_tile_{l}' for l in RESERVOIR_ORDER]
     if not any(n in _param_cfg for n in names):
@@ -151,7 +174,8 @@ def _recession_exponents():
 
 
 try:
-    rec_exp, rec_k = _recession_exponents()
+    rec_exp, rec_k           = _recession_exponents()
+    _pss, _pss_k             = _post_spinup_hwater()
     result = run_and_score(
         CONFIG_TEMPLATE,
         t_recession                = [10 ** get(f'log__t_recession_{l}') for l in RESERVOIR_ORDER],
@@ -174,6 +198,8 @@ try:
         routing_N              =  ROUTING_N,
         enforce_water_balance  =  ENFORCE_WB,
         initial_states         =  INITIAL_STATES,
+        post_spinup_states     =  _pss,
+        post_spinup_k          =  _pss_k,
         start                  =  DECADE_START,
         end                    =  DECADE_END,
         spin_up_cycles         =  SPIN_UP_CYCLES,

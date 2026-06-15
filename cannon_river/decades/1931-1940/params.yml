@@ -110,6 +110,14 @@ parameters:
     fixed:   0.0
     active:  false
 
+  log__H0_deep:
+    description: "log10 initial deep reservoir water depth [mm] — post-spin-up override"
+    lower:   1.0
+    upper:   4.5
+    initial: 2.5
+    fixed:   2.5
+    active:  true
+
   et_scale:
     description: "global ET multiplier — inactive (water balance enforced globally)"
     lower:   0.5
