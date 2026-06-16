@@ -1,7 +1,9 @@
 # 1931-1940: independent calibration, 1931-01-01 to 1940-12-31.
-# A03 model structure: soil / intermediate / deep; frozen_ground enabled; k=11 active params.
-# Junction type: leakance on intermediate → deep (St. Lawrence shale confining unit).
-# f_exfiltration_intermediate is inactive (replaced by log__leakance_R_intermediate).
+# A03 model structure: soil / intermediate / deep; frozen_ground enabled; k=13 active params.
+# Junctions:
+#   intermediate → deep: leakance (St. Lawrence shale confining unit)
+#   deep: f_exfiltration_deep < 1 (vertical loss to sub-stream units) +
+#         H_threshold_deep (springs inactive below sill)
 
 modules:
   snowpack:          true
@@ -78,6 +80,22 @@ parameters:
     upper:   4.0
     initial: 2.0
     fixed:   2.0
+    active:  true
+
+  f_exfiltration_deep:
+    description: "fraction of above-threshold Wonewoc drainage to stream; remainder lost vertically to sub-stream units"
+    lower:   0.01
+    upper:   0.99
+    initial: 0.5
+    fixed:   0.5
+    active:  true
+
+  log__H_threshold_deep:
+    description: "log10 Wonewoc dead-storage threshold [mm]; springs inactive below this head, all drainage exits vertically"
+    lower:   0.0
+    upper:   3.5
+    initial: 2.5
+    fixed:   2.5
     active:  true
 
   PDD_melt_factor:

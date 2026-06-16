@@ -18,6 +18,9 @@ from mnished import HydrographSeparation, run_and_score
 # Intentional: et_scale carries explicit responsibility for the water balance.
 warnings.filterwarnings('ignore', message=r"enforce_water_balance='none'",
                         category=UserWarning)
+# Intentional: f_exfiltration_deep < 1 models permanent vertical loss to sub-stream units.
+warnings.filterwarnings('ignore', message=r"f_to_discharge of bottom water-storage layer",
+                        category=UserWarning)
 
 with open('params.yml') as f:
     _cfg = yaml.safe_load(f)
@@ -225,7 +228,7 @@ try:
     result = run_and_score(
         CONFIG_TEMPLATE,
         t_recession                = [10 ** get(f'log__t_recession_{l}') for l in RESERVOIR_ORDER],
-        f_to_discharge         = [get(f'f_exfiltration_{l}') for l in RESERVOIR_ORDER[:-1]
+        f_to_discharge         = [get(f'f_exfiltration_{l}') for l in RESERVOIR_ORDER
                                    if _param_cfg.get(f'f_exfiltration_{l}', {}).get('active', True)] or None,
         melt_factor            =  get('PDD_melt_factor'),
         fdd_threshold          =  10 ** get('log__fdd_threshold'),
