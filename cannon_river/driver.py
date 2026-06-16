@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generic Dakota driver for hydroRaVENS calibration.
+Generic Dakota driver for MNiShed calibration.
 Reads all reservoir structure and parameters from params.yml — no hard-coded names.
 
 Compatible with any reservoir_order (2-res, 3-res, ...) and any combination of
@@ -12,7 +12,7 @@ import yaml
 import pandas as pd
 import dakota.interfacing as di
 import numpy as np
-from hydroravens import HydrographSeparation, run_and_score
+from mnished import HydrographSeparation, run_and_score
 
 # Suppress the enforce_water_balance='none' warning that fires every evaluation.
 # Intentional: et_scale carries explicit responsibility for the water balance.
@@ -148,6 +148,50 @@ def _et_scale():
     return params['et_scale'] if p['active'] else float(p['fixed'])
 
 
+def _leakance_R():
+    """Return per-reservoir leakance resistance [days], or None if not configured.
+
+    Reads log__leakance_R_{label} from params.yml.  Returns a list with None
+    for reservoirs that have no leakance key (leaving them as fraction junctions).
+    Returns None altogether if no leakance keys exist in the config.
+    """
+    names = [f'log__leakance_R_{l}' for l in RESERVOIR_ORDER]
+    if not any(n in _param_cfg for n in names):
+        return None, 0
+    vals = []
+    k = 0
+    for n in names:
+        if n in _param_cfg:
+            vals.append(10 ** get(n))
+            if _param_cfg[n].get('active', False):
+                k += 1
+        else:
+            vals.append(None)
+    return vals, k
+
+
+def _H_threshold():
+    """Return per-reservoir dead-storage threshold [mm], or None if not configured.
+
+    Reads log__H_threshold_{label} from params.yml.  Returns a list with None
+    for reservoirs that have no threshold key (leaving them as fraction junctions).
+    Returns None altogether if no threshold keys exist in the config.
+    """
+    names = [f'log__H_threshold_{l}' for l in RESERVOIR_ORDER]
+    if not any(n in _param_cfg for n in names):
+        return None, 0
+    vals = []
+    k = 0
+    for n in names:
+        if n in _param_cfg:
+            vals.append(10 ** get(n))
+            if _param_cfg[n].get('active', False):
+                k += 1
+        else:
+            vals.append(None)
+    return vals, k
+
+
 def _recession_exponents():
     if _FIXED_REC is not None:
         return list(_FIXED_REC), 0
@@ -176,6 +220,8 @@ def _recession_exponents():
 try:
     rec_exp, rec_k           = _recession_exponents()
     _pss, _pss_k             = _post_spinup_hwater()
+    _lr, _lr_k               = _leakance_R()
+    _ht, _ht_k               = _H_threshold()
     result = run_and_score(
         CONFIG_TEMPLATE,
         t_recession                = [10 ** get(f'log__t_recession_{l}') for l in RESERVOIR_ORDER],
@@ -193,6 +239,10 @@ try:
         et_alpha               =  _et_alpha(),
         recession_exponents            = rec_exp,
         recession_exponents_calibrated = rec_k,
+        leakance_R             =  _lr,
+        leakance_R_calibrated  =  _lr_k,
+        H_threshold            =  _ht,
+        H_threshold_calibrated =  _ht_k,
         modules                =  MODULES,
         routing_K              =  10 ** get('log__routing_K'),
         routing_N              =  ROUTING_N,
