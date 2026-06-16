@@ -1,5 +1,7 @@
 # 1931-1940: independent calibration, 1931-01-01 to 1940-12-31.
-# A02 model structure: soil / intermediate / deep; frozen_ground enabled; k=8 active params.
+# A03 model structure: soil / intermediate / deep; frozen_ground enabled; k=11 active params.
+# Junction type: leakance on intermediate → deep (St. Lawrence shale confining unit).
+# f_exfiltration_intermediate is inactive (replaced by log__leakance_R_intermediate).
 
 modules:
   snowpack:          true
@@ -63,11 +65,19 @@ parameters:
     active:  true
 
   f_exfiltration_intermediate:
-    description: "fraction of intermediate drainage to stream (remainder recharges deep)"
+    description: "fraction of intermediate drainage to stream — inactive; replaced by leakance junction"
     lower:   0.01
     upper:   0.99
     initial: 0.012
     fixed:   0.012
+    active:  false
+
+  log__leakance_R_intermediate:
+    description: "log10 leakance resistance through St. Lawrence shale confining unit [days]; Q_leak = max(H_inter - H_deep, 0) / R"
+    lower:   0.5
+    upper:   4.0
+    initial: 2.0
+    fixed:   2.0
     active:  true
 
   PDD_melt_factor:
@@ -109,6 +119,22 @@ parameters:
     initial: 0.0
     fixed:   0.0
     active:  false
+
+  log__H0_soil:
+    description: "log10 initial soil-zone water depth [mm] — post-spin-up override"
+    lower:   1.0
+    upper:   4.0
+    initial: 2.5
+    fixed:   2.5
+    active:  true
+
+  log__H0_intermediate:
+    description: "log10 initial intermediate reservoir water depth [mm] — post-spin-up override"
+    lower:   1.0
+    upper:   4.5
+    initial: 2.5
+    fixed:   2.5
+    active:  true
 
   log__H0_deep:
     description: "log10 initial deep reservoir water depth [mm] — post-spin-up override"

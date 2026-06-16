@@ -225,7 +225,8 @@ try:
     result = run_and_score(
         CONFIG_TEMPLATE,
         t_recession                = [10 ** get(f'log__t_recession_{l}') for l in RESERVOIR_ORDER],
-        f_to_discharge         = [get(f'f_exfiltration_{l}') for l in RESERVOIR_ORDER[:-1]],
+        f_to_discharge         = [get(f'f_exfiltration_{l}') for l in RESERVOIR_ORDER[:-1]
+                                   if _param_cfg.get(f'f_exfiltration_{l}', {}).get('active', True)] or None,
         melt_factor            =  get('PDD_melt_factor'),
         fdd_threshold          =  10 ** get('log__fdd_threshold'),
         snow_insulation_k      =  get('snow_insulation_k'),
