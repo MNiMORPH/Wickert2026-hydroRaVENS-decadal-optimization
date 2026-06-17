@@ -89,7 +89,7 @@ $PYTHON generate_dakota_in.py --params "$PARAMS"
 # 500+ evaluations — catches config errors (missing keys, bad paths) immediately.
 $PYTHON - "$PARAMS" << 'PYEOF' || { echo "ERROR: Pre-flight config check failed. Aborting." >&2; exit 1; }
 import yaml, sys
-from hydroravens import Buckets
+from mnished import Buckets
 with open(sys.argv[1]) as f:
     p = yaml.safe_load(f)
 cfg = p["driver"]["config_template"]
