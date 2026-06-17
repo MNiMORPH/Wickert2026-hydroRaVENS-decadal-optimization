@@ -2,7 +2,7 @@
 """
 Factory: create a new watershed calibration directory from a config YAML.
 
-Usage (from Wickert2026-hydroRaVENS-decadal-optimization/):
+Usage (from Wickert2026-MNiShed-decadal-optimization/):
     python setup_watershed.py --config watershed_configs/blue_earth_river.yml
     python setup_watershed.py --config watershed_configs/le_sueur_river.yml
 
@@ -86,7 +86,9 @@ for fname in TITLE_SCRIPTS:
 
 PARAMS_TEMPLATE = """\
 # {label}: independent calibration, {decade_start} to {decade_end}.
-# A02 model structure: soil / intermediate / deep; frozen_ground enabled; k=8 active params.
+# A02 model structure (default): soil / intermediate / deep; frozen_ground enabled; k=8 active params.
+# A03 option: replace f_exfiltration_intermediate (active→false) with log__leakance_R_intermediate
+#             (active→true); optionally add f_exfiltration_deep and log__H_threshold_deep.
 
 modules:
   snowpack:          true
@@ -150,12 +152,62 @@ parameters:
     active:  true
 
   f_exfiltration_intermediate:
-    description: "fraction of intermediate drainage to stream (remainder recharges deep)"
+    description: "fraction of intermediate drainage to stream (remainder recharges deep) — A02; deactivate for A03 leakance"
     lower:   0.01
     upper:   0.99
     initial: {f_exfiltration_intermediate}
     fixed:   {f_exfiltration_intermediate}
     active:  true
+
+  # A03 junction parameters — activate in place of f_exfiltration_intermediate
+  log__leakance_R_intermediate:
+    description: "log10 leakance resistance through confining unit [days]; Q_leak = max(H_inter - H_deep, 0) / R — A03"
+    lower:   0.5
+    upper:   4.0
+    initial: 2.0
+    fixed:   2.0
+    active:  false
+
+  f_exfiltration_deep:
+    description: "fraction of above-threshold deep drainage to stream; remainder lost vertically to sub-stream units — A03"
+    lower:   0.01
+    upper:   0.99
+    initial: 0.5
+    fixed:   0.5
+    active:  false
+
+  log__H_threshold_deep:
+    description: "log10 deep dead-storage threshold [mm]; springs inactive below this head — A03"
+    lower:   0.0
+    upper:   3.5
+    initial: 2.5
+    fixed:   2.5
+    active:  false
+
+  # Post-spinup initial storage — activate when spin-up equilibrium is poorly constrained
+  log__H0_soil:
+    description: "log10 initial soil-zone water depth [mm] — post-spin-up override"
+    lower:   1.0
+    upper:   4.0
+    initial: 2.5
+    fixed:   2.5
+    active:  false
+
+  log__H0_intermediate:
+    description: "log10 initial intermediate reservoir water depth [mm] — post-spin-up override"
+    lower:   1.0
+    upper:   4.5
+    initial: 2.5
+    fixed:   2.5
+    active:  false
+
+  log__H0_deep:
+    description: "log10 initial deep reservoir water depth [mm] — post-spin-up override"
+    lower:   1.0
+    upper:   4.5
+    initial: 2.5
+    fixed:   2.5
+    active:  false
 
   PDD_melt_factor:
     description: "degree-day snowmelt rate [mm SWE / degC / day]"
@@ -341,7 +393,7 @@ compute_script.write_text(f"""\
 # {title} — forcing-data compute (no internet required)
 #
 # Interpolates GHCN station data to basin-mean time series and exports to
-# hydroRaVENS CSV + config YML.  Requires the GRASS mapset to already
+# MNiShed CSV + config YML.  Requires the GRASS mapset to already
 # contain discharge_$GAUGE, {name}_basin, and ghcn_stations (run the
 # download script first).
 #
@@ -373,7 +425,7 @@ for ELEM in PRCP TMAX TMIN; do
         -f
 done
 
-# ── 5. Export to hydroRaVENS format ──────────────────────────────────────────
+# ── 5. Export to MNiShed format ──────────────────────────────────────────
 db.out.hydroravens \\
     basin={name}_basin \\
     discharge_table=discharge_${{GAUGE}}_timeseries \\
