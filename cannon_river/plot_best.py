@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Find the best-fit parameters from a completed Dakota calibration run,
-re-run hydroRaVENS with those parameters, and produce a diagnostic plot.
+re-run MNiShed with those parameters, and produce a diagnostic plot.
 
 Figure layout
 -------------
@@ -28,11 +28,14 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from hydroravens import HydrographSeparation, run_and_score
-from hydroravens.calibration import _nse, _kge, _log_kge, _kge_logfdc
+from mnished import HydrographSeparation, run_and_score
+from mnished.calibration import _nse, _kge, _log_kge, _kge_logfdc
 
 # Intentional: et_scale carries explicit responsibility for the water balance.
 warnings.filterwarnings('ignore', message=r"enforce_water_balance='none'",
+                        category=UserWarning)
+# Intentional: f_exfiltration_deep < 1 models permanent vertical loss.
+warnings.filterwarnings('ignore', message=r"f_to_discharge of bottom water-storage layer",
                         category=UserWarning)
 
 CFG_TEMPLATE = None  # set in __main__ from --params after arg parsing
@@ -48,10 +51,11 @@ _MODULE_PARAMS_MAP = {
 }
 
 _RES_LABEL = {
-    'shallow': 'sh',
-    'soil':    'soil',
-    'karst':   'karst',
-    'deep':    'deep',
+    'shallow':      'sh',
+    'soil':         'soil',
+    'intermediate': 'inter',
+    'karst':        'karst',
+    'deep':         'deep',
 }
 
 
@@ -220,38 +224,97 @@ def _recession_exponents(row):
     return exponents, n_cal
 
 
+def _leakance_R(row):
+    params = _PARAMS or {}
+    names  = [f'log__leakance_R_{l}' for l in RESERVOIR_ORDER]
+    if not any(n in params for n in names):
+        return None, 0
+    vals, k = [], 0
+    for n in names:
+        if n in params:
+            vals.append(10 ** _get(row, n))
+            if _is_active(n):
+                k += 1
+        else:
+            vals.append(None)
+    return vals, k
+
+
+def _H_threshold(row):
+    params = _PARAMS or {}
+    names  = [f'log__H_threshold_{l}' for l in RESERVOIR_ORDER]
+    if not any(n in params for n in names):
+        return None, 0
+    vals, k = [], 0
+    for n in names:
+        if n in params:
+            vals.append(10 ** _get(row, n))
+            if _is_active(n):
+                k += 1
+        else:
+            vals.append(None)
+    return vals, k
+
+
+def _post_spinup_hwater(row):
+    params = _PARAMS or {}
+    names  = [f'log__H0_{l}' for l in RESERVOIR_ORDER]
+    if not any(n in params for n in names):
+        return None, 0
+    vals, k = [], 0
+    for n in names:
+        if n in params:
+            vals.append(10 ** _get(row, n))
+            if _is_active(n):
+                k += 1
+        else:
+            vals.append(None)
+    return {'reservoirs': vals}, k
+
+
 def run_model(row):
+    params = _PARAMS or {}
     rec_exp, rec_k = _recession_exponents(row)
+    _lr,  _lr_k   = _leakance_R(row)
+    _ht,  _ht_k   = _H_threshold(row)
+    _pss, _pss_k  = _post_spinup_hwater(row)
     return run_and_score(
         CFG_TEMPLATE,
         t_recession                = [10 ** _get(row, f'log__t_recession_{l}')
-                                   for l in RESERVOIR_ORDER],
-        f_to_discharge         = [_get(row, f'f_exfiltration_{l}')
-                                   for l in RESERVOIR_ORDER[:-1]],
-        melt_factor            =  _get(row, 'PDD_melt_factor'),
-        fdd_threshold          =  10 ** _get(row, 'log__fdd_threshold'),
-        snow_insulation_k      =  _get(row, 'snow_insulation_k'),
-        Hmax                   =  _hmax(row),
-        pdm_H0                 =  _pdm_list(row),
-        f_tile                 =  _tile_list(row),
-        tau_tile               =  _tau_tile(row),
-        direct_runoff_fraction =  _get(row, 'f_direct_runoff'),
-        baseflow_Q             =  _get(row, 'baseflow_Q'),
-        et_scale               =  _et_scale(row),
-        et_alpha               =  _et_alpha(row),
-        wp_soil                =  _wp_soil(row),
-        wp_soil_sigma          =  _wp_soil_sigma(row),
+                                      for l in RESERVOIR_ORDER],
+        f_to_discharge             = [_get(row, f'f_exfiltration_{l}')
+                                      for l in RESERVOIR_ORDER
+                                      if params.get(f'f_exfiltration_{l}', {}).get('active', True)] or None,
+        melt_factor                =  _get(row, 'PDD_melt_factor'),
+        fdd_threshold              =  10 ** _get(row, 'log__fdd_threshold'),
+        snow_insulation_k          =  _get(row, 'snow_insulation_k'),
+        Hmax                       =  _hmax(row),
+        pdm_H0                     =  _pdm_list(row),
+        f_tile                     =  _tile_list(row),
+        tau_tile                   =  _tau_tile(row),
+        direct_runoff_fraction     =  _get(row, 'f_direct_runoff'),
+        baseflow_Q                 =  _get(row, 'baseflow_Q'),
+        et_scale                   =  _et_scale(row),
+        et_alpha                   =  _et_alpha(row),
+        wp_soil                    =  _wp_soil(row),
+        wp_soil_sigma              =  _wp_soil_sigma(row),
+        leakance_R                 =  _lr,
+        leakance_R_calibrated      =  _lr_k,
+        H_threshold                =  _ht,
+        H_threshold_calibrated     =  _ht_k,
         recession_exponents            = rec_exp,
         recession_exponents_calibrated = rec_k,
-        routing_K              =  10 ** _get(row, 'log__routing_K'),
-        routing_N              =  ROUTING_N,
-        modules                =  MODULES,
-        metric                 =  METRIC,
-        enforce_water_balance  =  ENFORCE_WB,
-        spin_up_cycles         =  SPIN_UP_CYCLES,
-        initial_states         =  INITIAL_STATES,
-        start                  =  DECADE_START,
-        end                    =  DECADE_END,
+        routing_K                  =  10 ** _get(row, 'log__routing_K'),
+        routing_N                  =  ROUTING_N,
+        modules                    =  MODULES,
+        metric                     =  METRIC,
+        enforce_water_balance      =  ENFORCE_WB,
+        spin_up_cycles             =  SPIN_UP_CYCLES,
+        initial_states             =  INITIAL_STATES,
+        post_spinup_states         =  _pss,
+        post_spinup_k              =  _pss_k,
+        start                      =  DECADE_START,
+        end                        =  DECADE_END,
     )
 
 
@@ -314,15 +377,35 @@ def make_plot(result, params_row, save_path):
         tau_parts.append(f'$\\tau_{{{lbl}}}$ = {val:{fmt}} d')
     tau_str = ',  '.join(tau_parts)
 
+    params = _PARAMS or {}
     f_parts = []
-    for label in RESERVOIR_ORDER[:-1]:
-        val = _get(params_row, f'f_exfiltration_{label}')
-        lbl = _RES_LABEL.get(label, label)
-        f_parts.append(f'$f_{{{lbl}}}$ = {val:.3f}')
+    for label in RESERVOIR_ORDER:
+        key = f'f_exfiltration_{label}'
+        if params.get(key, {}).get('active', True) and key in params:
+            val = _get(params_row, key)
+            lbl = _RES_LABEL.get(label, label)
+            f_parts.append(f'$f_{{{lbl}}}$ = {val:.3f}')
+    lr_parts = []
+    for label in RESERVOIR_ORDER:
+        key = f'log__leakance_R_{label}'
+        if key in params:
+            val = 10 ** _get(params_row, key)
+            lbl = _RES_LABEL.get(label, label)
+            lr_parts.append(f'$R_{{{lbl}}}$ = {val:.0f} d')
+    ht_parts = []
+    for label in RESERVOIR_ORDER:
+        key = f'log__H_threshold_{label}'
+        if key in params:
+            val = 10 ** _get(params_row, key)
+            lbl = _RES_LABEL.get(label, label)
+            ht_parts.append(f'$H_{{t,{lbl}}}$ = {val:.0f} mm')
+    junction_str = ',  '.join(lr_parts + ht_parts)
     f_str = ',  '.join(f_parts)
 
     param_lines = (f'BFI: obs = {result.bfi_obs:.3f},  mod = {result.bfi_mod:.3f}\n'
                    + tau_str + '\n' + f_str)
+    if junction_str:
+        param_lines += '\n' + junction_str
 
     if _is_active('PDD_melt_factor'):
         param_lines += (f',  PDD = {_get(params_row, "PDD_melt_factor"):.2f}'
@@ -409,7 +492,7 @@ def make_plot(result, params_row, save_path):
     ax_fdc.set_title('Flow duration curve', fontsize=10)
     ax_fdc.grid(True, which='both', alpha=0.3)
 
-    fig.suptitle('hydroRaVENS – Cannon River best-fit calibration', fontsize=13)
+    fig.suptitle('MNiShed – Cannon River best-fit calibration', fontsize=13)
     plt.savefig(save_path, dpi=150, bbox_inches='tight')
     print(f'Figure saved to {save_path}')
 
@@ -462,10 +545,25 @@ if __name__ == '__main__':
         val = 10 ** _get(best, f'log__t_recession_{label}')
         lbl = _RES_LABEL.get(label, label)
         print(f'  t_recession_{lbl:<8} = {val:.1f} days')
-    for label in RESERVOIR_ORDER[:-1]:
-        val = _get(best, f'f_exfiltration_{label}')
-        lbl = _RES_LABEL.get(label, label)
-        print(f'  f_exfilt_{lbl:<7} = {val:.4f}')
+    params = _PARAMS or {}
+    for label in RESERVOIR_ORDER:
+        key = f'f_exfiltration_{label}'
+        if key in params and params[key].get('active', True):
+            val = _get(best, key)
+            lbl = _RES_LABEL.get(label, label)
+            print(f'  f_exfilt_{lbl:<7} = {val:.4f}')
+    for label in RESERVOIR_ORDER:
+        key = f'log__leakance_R_{label}'
+        if key in params:
+            val = 10 ** _get(best, key)
+            lbl = _RES_LABEL.get(label, label)
+            print(f'  leakance_R_{lbl:<5} = {val:.1f} days')
+    for label in RESERVOIR_ORDER:
+        key = f'log__H_threshold_{label}'
+        if key in params:
+            val = 10 ** _get(best, key)
+            lbl = _RES_LABEL.get(label, label)
+            print(f'  H_threshold_{lbl:<4} = {val:.1f} mm')
     if _is_active('PDD_melt_factor'):
         print(f'  PDD_melt_factor  = {_get(best, "PDD_melt_factor"):.4f} mm/°C/day')
     hmax_key = f'log__Hmax_{RESERVOIR_ORDER[0]}'

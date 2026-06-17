@@ -36,6 +36,8 @@ import pandas as pd
 import yaml
 
 warnings.filterwarnings('ignore')
+warnings.filterwarnings('ignore', message=r"f_to_discharge of bottom water-storage layer",
+                        category=UserWarning)
 
 # ---------------------------------------------------------------------------
 # CLI
@@ -174,8 +176,8 @@ for decade_dir in decade_dirs:
     # --- re-run best to get full metrics ---
     # Import here so summarize.py works even without hydroravens on PATH.
     try:
-        from hydroravens import HydrographSeparation, run_and_score
-        from hydroravens.calibration import _nse, _kge, _log_kge
+        from mnished import HydrographSeparation, run_and_score
+        from mnished.calibration import _nse, _kge, _log_kge
 
         param_cfg = cfg['parameters']
         modules   = cfg.get('modules', {})
@@ -230,27 +232,87 @@ for decade_dir in decade_dirs:
         hs.fit()
         init_states = {'reservoirs': hs.get_initial_conditions()['H0']}
 
+        def _lr():
+            names = [f'log__leakance_R_{l}' for l in reservoir_order]
+            if not any(n in param_cfg for n in names):
+                return None, 0
+            vals, k = [], 0
+            for n in names:
+                if n in param_cfg:
+                    vals.append(10 ** _get(n))
+                    if param_cfg[n].get('active', False):
+                        k += 1
+                else:
+                    vals.append(None)
+            return vals, k
+
+        def _ht():
+            names = [f'log__H_threshold_{l}' for l in reservoir_order]
+            if not any(n in param_cfg for n in names):
+                return None, 0
+            vals, k = [], 0
+            for n in names:
+                if n in param_cfg:
+                    vals.append(10 ** _get(n))
+                    if param_cfg[n].get('active', False):
+                        k += 1
+                else:
+                    vals.append(None)
+            return vals, k
+
+        def _pss():
+            names = [f'log__H0_{l}' for l in reservoir_order]
+            if not any(n in param_cfg for n in names):
+                return None, 0
+            vals, k = [], 0
+            for n in names:
+                if n in param_cfg:
+                    vals.append(10 ** _get(n))
+                    if param_cfg[n].get('active', False):
+                        k += 1
+                else:
+                    vals.append(None)
+            return {'reservoirs': vals}, k
+
+        _lr_vals,  _lr_k  = _lr()
+        _ht_vals,  _ht_k  = _ht()
+        _pss_vals, _pss_k = _pss()
+
+        et_scale_val = (_get('et_scale')
+                        if 'et_scale' in param_cfg else None)
+        et_alpha_val = (_get('et_alpha')
+                        if 'et_alpha' in param_cfg else None)
+
         result = run_and_score(
             config_tmpl,
-            t_recession      = [10 ** _get(f'log__t_recession_{l}')
-                                 for l in reservoir_order],
-            f_to_discharge   = [_get(f'f_exfiltration_{l}')
-                                 for l in reservoir_order[:-1]],
-            melt_factor      =  _get('PDD_melt_factor'),
-            fdd_threshold    =  10 ** _get('log__fdd_threshold'),
-            snow_insulation_k=  _get('snow_insulation_k'),
-            direct_runoff_fraction = _get('f_direct_runoff'),
-            baseflow_Q       =  _get('baseflow_Q'),
+            t_recession            = [10 ** _get(f'log__t_recession_{l}')
+                                      for l in reservoir_order],
+            f_to_discharge         = [_get(f'f_exfiltration_{l}')
+                                      for l in reservoir_order
+                                      if param_cfg.get(f'f_exfiltration_{l}', {}).get('active', True)] or None,
+            melt_factor            =  _get('PDD_melt_factor'),
+            fdd_threshold          =  10 ** _get('log__fdd_threshold'),
+            snow_insulation_k      =  _get('snow_insulation_k'),
+            direct_runoff_fraction =  _get('f_direct_runoff'),
+            baseflow_Q             =  _get('baseflow_Q'),
+            et_scale               =  et_scale_val,
+            et_alpha               =  et_alpha_val,
+            leakance_R             =  _lr_vals,
+            leakance_R_calibrated  =  _lr_k,
+            H_threshold            =  _ht_vals,
+            H_threshold_calibrated =  _ht_k,
             recession_exponents    =  _rec_exp(),
-            routing_K        =  10 ** _get('log__routing_K'),
-            routing_N        =  routing_N,
-            modules          =  modules,
-            enforce_water_balance = enforce_wb,
-            spin_up_cycles   =  spin_up,
-            initial_states   =  init_states,
-            start            =  decade_start,
-            end              =  decade_end_nominal,
-            metric           =  drv['metric'],
+            routing_K              =  10 ** _get('log__routing_K'),
+            routing_N              =  routing_N,
+            modules                =  modules,
+            enforce_water_balance  =  enforce_wb,
+            spin_up_cycles         =  spin_up,
+            initial_states         =  init_states,
+            post_spinup_states     =  _pss_vals,
+            post_spinup_k          =  _pss_k,
+            start                  =  decade_start,
+            end                    =  decade_end_nominal,
+            metric                 =  drv['metric'],
         )
         b    = result.buckets
         mask = (b.hydrodata['Specific Discharge (modeled) [mm/day]'].notna()
