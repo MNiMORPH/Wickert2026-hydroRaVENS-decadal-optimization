@@ -276,8 +276,11 @@ def make_params(decade_dir, backbone, start, end, is_first):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--backbone', default=None,
-                        help='Path to backbone_v5.0 evaluations.dat')
+                        help='Path to backbone evaluations.dat')
+    parser.add_argument('--version', default='5.0',
+                        help='Version label written into output filenames and headers (default: 5.0)')
     args = parser.parse_args()
+    ver = args.version
 
     if args.backbone:
         best, _ = load_backbone_best(args.backbone)
@@ -297,13 +300,13 @@ def main():
         end   = f'{year_start + 9}-12-31'
 
         params = make_params(decade_dir, backbone, start, end, is_first=first_decade)
-        out_path = decade_dir / 'params_transient_v5.0.yml'
+        out_path = decade_dir / f'params_transient_v{ver}.yml'
 
         with open(out_path, 'w') as f:
-            f.write(f"# {decade_dir.name}: transient calibration v5.0.\n")
-            f.write(f"# Backbone fixed (backbone_v5.0); 4 active: "
+            f.write(f"# {decade_dir.name}: transient calibration v{ver}.\n")
+            f.write(f"# Backbone fixed (backbone_v{ver}); 4 active: "
                     f"log__recession_coeff_soil, f_tile_soil, f_exfiltration_soil, et_scale.\n")
-            f.write(f"# b_soil=2 fixed (Dupuit-Forchheimer); tau_tile fixed from backbone_v5.0.\n")
+            f.write(f"# b_soil=2 fixed (Dupuit-Forchheimer); tau_tile fixed from backbone_v{ver}.\n")
             if first_decade:
                 f.write(f"# spin_up_cycles=1 (first decade, analytical SS start).\n\n")
             else:
