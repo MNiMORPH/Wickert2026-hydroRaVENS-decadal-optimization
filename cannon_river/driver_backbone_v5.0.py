@@ -124,17 +124,25 @@ def _f_tile():
     return vals if any_tile else None
 
 
+_PER_DECADE_FTILE = _driver.get('per_decade_f_tile', None)
+
 try:
     _lr, _lr_k  = _leakance_R()
     _ht, _ht_k  = _H_threshold()
     _rec_exp    = _recession_exponents()
     _f_dis      = _f_discharge()
-    _ft         = _f_tile()
+    _ft_global  = _f_tile()
     _tau_tile   = (10 ** get('log__tau_tile')
                    if 'log__tau_tile' in _param_cfg else None)
 
     scores = []
     for _dec in _valid_decades:
+        if _PER_DECADE_FTILE:
+            _decade_key = _dec['start'][:4] + '-' + _dec['end'][:4]
+            _ft_val = float(_PER_DECADE_FTILE.get(_decade_key, get('f_tile_soil')))
+            _ft = [_ft_val if l == 'soil' else 0.0 for l in RESERVOIR_ORDER]
+        else:
+            _ft = _ft_global
         try:
             result = run_and_score(
                 CONFIG_TEMPLATE,
