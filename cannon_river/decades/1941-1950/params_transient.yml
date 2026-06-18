@@ -27,7 +27,7 @@ driver:
   enforce_water_balance: none
 parameters:
   log__recession_coeff_soil:
-    description: log10 soil recession coefficient [days]
+    description: log10 soil recession coefficient κ [days; e-folding time iff b=1]
     lower: 1.0
     upper: 4.5
     initial: 3.5
@@ -55,14 +55,14 @@ parameters:
     fixed: 1.0
     active: true
   log__recession_coeff_intermediate:
-    description: log10 PdC recession coefficient [days] — backbone fixed
+    description: log10 PdC recession coefficient κ [days; e-folding time iff b=1] — backbone fixed
     lower: 1.0
     upper: 5.0
     initial: 4.856558642
     fixed: 4.856558642
     active: false
   log__recession_coeff_deep:
-    description: log10 Wonewoc recession coefficient [days] — backbone fixed
+    description: log10 Wonewoc recession coefficient κ [days; e-folding time iff b=1] — backbone fixed
     lower: 3.0
     upper: 5.5
     initial: 4.131880144

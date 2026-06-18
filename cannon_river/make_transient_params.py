@@ -114,7 +114,7 @@ def make_params(decade_dir, backbone, start, end, is_first):
         'parameters': {
             # ---- PER-DECADE ACTIVE (4) ----
             'log__recession_coeff_soil': {
-                'description': 'log10 soil recession coefficient [days]',
+                'description': 'log10 soil recession coefficient κ [days; e-folding time iff b=1]',
                 'lower': 1.0, 'upper': 4.5, 'initial': 3.5, 'fixed': 3.5,
                 'active': True,
             },
@@ -135,14 +135,14 @@ def make_params(decade_dir, backbone, start, end, is_first):
             },
             # ---- BACKBONE FIXED ----
             'log__recession_coeff_intermediate': {
-                'description': 'log10 PdC recession coefficient [days] — backbone fixed',
+                'description': 'log10 PdC recession coefficient κ [days; e-folding time iff b=1] — backbone fixed',
                 'lower': 1.0, 'upper': 5.0,
                 'initial': backbone['log__recession_coeff_intermediate'],
                 'fixed':   backbone['log__recession_coeff_intermediate'],
                 'active': False,
             },
             'log__recession_coeff_deep': {
-                'description': 'log10 Wonewoc recession coefficient [days] — backbone fixed',
+                'description': 'log10 Wonewoc recession coefficient κ [days; e-folding time iff b=1] — backbone fixed',
                 'lower': 3.0, 'upper': 5.5,
                 'initial': backbone['log__recession_coeff_deep'],
                 'fixed':   backbone['log__recession_coeff_deep'],
