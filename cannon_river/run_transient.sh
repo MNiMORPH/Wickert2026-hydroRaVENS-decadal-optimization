@@ -4,12 +4,21 @@
 # for the next decade.
 #
 # Prerequisites:
-#   1. Run make_transient_params.py to create params_transient.yml in each
-#      decade directory (optionally with --backbone <run_dir>/evaluations.dat).
-#   2. Backbone fixed values must be set in params_transient.yml already.
+#   1. Run make_transient_params.py (or make_transient_params_v5.0.py) to
+#      create params_transient[_vX.Y].yml in each decade directory.
+#   2. Backbone fixed values must be set in those params files already.
 #
-# Usage: bash run_transient.sh [description]
+# Usage: bash run_transient.sh [description] [driver_file] [params_suffix] [--prev-states PATH]
 # e.g.:  bash run_transient.sh transient_v1
+#        bash run_transient.sh transient_v5.0 driver_transient_v5.0.py _v5.0
+#        bash run_transient.sh transient_v3 driver_transient.py "" --prev-states decades/1931-1940/runs/.../final_states.yml
+#
+# driver_file   : driver script to copy as driver.py (default: driver_transient.py)
+# params_suffix : suffix appended to "params_transient" to form the params filename
+#                 (default: ""; result is params_transient.yml)
+#                 e.g. "_v5.0" → params_transient_v5.0.yml
+# --prev-states PATH : pre-load end-states from a prior run and skip the first
+#                      decade in DECADES (it was already calibrated externally).
 #
 # Run from cannon_river/
 
@@ -17,6 +26,18 @@ set -euo pipefail
 
 DESC="${1:-transient}"
 TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
+DRIVER="${2:-driver_transient.py}"
+PARAMS_SUFFIX="${3:-}"
+PREV_STATES_ARG=""
+SKIP_FIRST=false
+shift 3 || shift $# || true
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --prev-states) PREV_STATES_ARG="$2"; SKIP_FIRST=true; shift 2 ;;
+        *) shift ;;
+    esac
+done
+CANNON_RIVER_DIR="$(pwd)"
 
 DAKOTA=${DAKOTA:-/home/awickert/anaconda3/envs/dakota-env/bin/dakota}
 PYTHON=${PYTHON:-/home/awickert/anaconda3/envs/dakota-env/bin/python}
@@ -32,14 +53,23 @@ DECADES=(
     "decades/2011-2020"
 )
 
-PREV_FINAL_STATES=""  # path to final_states.yml from prior decade
+PREV_FINAL_STATES="${PREV_STATES_ARG}"  # path to final_states.yml from prior decade
 
+FIRST_ITERATION=true
 for DECADE_DIR in "${DECADES[@]}"; do
+    # If an external prev-states was supplied, skip the first decade
+    # (it was already calibrated and its end-states are in PREV_STATES_ARG).
+    if $SKIP_FIRST && $FIRST_ITERATION; then
+        FIRST_ITERATION=false
+        echo "=== Skipping $(basename $DECADE_DIR): already calibrated (using provided prev-states) ==="
+        continue
+    fi
+    FIRST_ITERATION=false
     DECADE_NAME=$(basename "$DECADE_DIR")
-    PARAMS="${DECADE_DIR}/params_transient.yml"
+    PARAMS="${DECADE_DIR}/params_transient${PARAMS_SUFFIX}.yml"
 
     if [[ ! -f "$PARAMS" ]]; then
-        echo "=== Skipping ${DECADE_NAME}: no params_transient.yml found ==="
+        echo "=== Skipping ${DECADE_NAME}: no params_transient${PARAMS_SUFFIX}.yml found ==="
         continue
     fi
 
@@ -101,6 +131,11 @@ if 'H0_fgi' in params:
     params['H0_fgi']['fixed']   = round(max(states.get('fgi', 0.0), 0.0), 4)
     params['H0_fgi']['initial'] = params['H0_fgi']['fixed']
 
+# Update H_deficit_carry
+if 'H0_deficit_carry' in params:
+    params['H0_deficit_carry']['fixed']   = round(states.get('H_deficit_carry', 0.0), 6)
+    params['H0_deficit_carry']['initial'] = params['H0_deficit_carry']['fixed']
+
 # Set spin_up_cycles=0 (chained run, no pre-decade spin-up)
 cfg['driver']['spin_up_cycles'] = 0
 
@@ -112,7 +147,7 @@ PYEOF
 
     # Create run directory and populate
     mkdir -p "$RUN_DIR"
-    cp driver_transient.py  "$RUN_DIR/driver.py"
+    cp "$CANNON_RIVER_DIR/$DRIVER" "$RUN_DIR/driver.py"
     cp run_driver.sh        "$RUN_DIR/"
     cp generate_dakota_in.py "$RUN_DIR/"
     cp plot_best.py         "$RUN_DIR/"
@@ -130,7 +165,7 @@ print(cfg['driver']['config_template'])
     $PYTHON generate_dakota_in.py --params params.yml
 
     # Pre-flight
-    $PYTHON - params.yml << 'PYEOF' || { echo "ERROR: Pre-flight failed." >&2; cd - > /dev/null; continue; }
+    $PYTHON - params.yml << 'PYEOF' || { echo "ERROR: Pre-flight failed." >&2; cd "$CANNON_RIVER_DIR"; continue; }
 import yaml, sys
 from mnished import Buckets
 with open(sys.argv[1]) as f:
@@ -159,13 +194,13 @@ if scores and all(abs(s - PENALTY) < 1e-9 for s in scores):
     sys.exit(1)
 best = min(s for s in scores if abs(s - PENALTY) > 1e-9)
 print(f"Best neg_kge={best:.6f}  (KGE={1-best:.4f})")
-' || { cd - > /dev/null; continue; }
+' || { cd "$CANNON_RIVER_DIR"; continue; }
 
     mv dakota.dat evaluations.dat
     mv dakota.out dakota_log.txt
 
     # Extract end-of-decade reservoir states for chaining
-    if $PYTHON "$(cd - > /dev/null; echo $PWD)/extract_end_state.py" .; then
+    if $PYTHON "$CANNON_RIVER_DIR/extract_end_state.py" .; then
         PREV_FINAL_STATES="$(pwd)/final_states.yml"
     else
         echo "Warning: extract_end_state.py failed for ${DECADE_NAME}; next decade uses analytical SS." >&2
@@ -173,7 +208,7 @@ print(f"Best neg_kge={best:.6f}  (KGE={1-best:.4f})")
     fi
 
     echo "=== Completed: ${RUN_DIR} ==="
-    cd - > /dev/null
+    cd "$CANNON_RIVER_DIR"
 done
 
 echo "=== Transient calibration complete ==="
