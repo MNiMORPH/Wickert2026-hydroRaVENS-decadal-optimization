@@ -1,31 +1,15 @@
 #!/bin/bash
-# Usage: bash run.sh [--overwrite] <decade-dir> [description]
+# Usage: bash run.sh <decade-dir> [description]
 # e.g.:  bash run.sh decades/1911-1920
-#        bash run.sh --overwrite decades/1911-1920 rerun
+#        bash run.sh decades/1911-1920 rerun
 #
-# Run from cannon_river/. Passes the decade's params.yml by path so Dakota
-# copies it into each evaluation directory as params.yml. Outputs are archived
-# into <decade-dir>/runs/<timestamp>_<desc>/.
-#
-# By default the script aborts if ephemeral outputs from a prior run still
-# exist (dakota.dat, dakota.out, out/, etc.). Use --overwrite to delete them first.
-# --overwrite is necessary when a prior run produced more evaluations than the
-# current one would, leaving stale out/run.*/ subdirectories.
+# Run from cannon_river/.  Creates the timestamped run directory upfront,
+# copies all necessary files into it, and works there so that multiple
+# decades can run simultaneously without sharing any state.
 
 set -euo pipefail
 
-# --- argument parsing ---
-FORCE=false
-POSITIONAL=()
-for arg in "$@"; do
-    case "$arg" in
-        --overwrite) FORCE=true ;;
-        *)       POSITIONAL+=("$arg") ;;
-    esac
-done
-set -- "${POSITIONAL[@]+"${POSITIONAL[@]}"}"
-
-DECADE_DIR="${1:?Usage: bash run.sh [--overwrite] <decade-dir>  e.g. decades/1911-1920}"
+DECADE_DIR="${1:?Usage: bash run.sh <decade-dir>  e.g. decades/1911-1920}"
 DESC="${2:-full}"
 DECADE_NAME=$(basename "$DECADE_DIR")
 TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
@@ -35,6 +19,7 @@ DAKOTA=${DAKOTA:-dakota}
 PYTHON=${PYTHON:-python}
 
 PARAMS="${DECADE_DIR}/params.yml"
+RUN_DIR="${DECADE_DIR}/runs/${RUN_NAME}"
 
 # --- skip decades with no discharge observations in their window ---
 N_OBS=$($PYTHON -c "
@@ -59,35 +44,34 @@ if [[ "${N_OBS:-0}" -eq 0 ]]; then
     exit 0
 fi
 
-# --- check for leftover outputs ---
-EXISTING=()
-for item in dakota.dat dakota.out dakota.rst fort.13 out best_fit.png; do
-    [[ -e "$item" ]] && EXISTING+=("$item")
-done
-# glob LHS files separately to avoid unmatched-glob errors
-for item in LHS_*.out; do
-    [[ -e "$item" ]] && EXISTING+=("$item")
-done
-
-if [[ ${#EXISTING[@]} -gt 0 ]]; then
-    if $FORCE; then
-        echo "Warning: removing prior outputs: ${EXISTING[*]}"
-        rm -rf out dakota.dat dakota.out dakota.rst fort.13 LHS_*.out best_fit.png
-    else
-        echo "Error: prior ephemeral outputs exist: ${EXISTING[*]}" >&2
-        echo "Re-run with --overwrite to delete them and start fresh." >&2
-        exit 1
-    fi
-fi
-
 echo "=== Run: ${DECADE_NAME} / ${RUN_NAME} ==="
 
-# Regenerate dakota.in from this decade's params.yml
-$PYTHON generate_dakota_in.py --params "$PARAMS"
+# --- create run directory and populate it ---
+mkdir -p "$RUN_DIR"
 
-# Pre-flight: initialise the model with the config template before spending
-# 500+ evaluations — catches config errors (missing keys, bad paths) immediately.
-$PYTHON - "$PARAMS" << 'PYEOF' || { echo "ERROR: Pre-flight config check failed. Aborting." >&2; exit 1; }
+cp "$PARAMS"             "$RUN_DIR/params.yml"
+cp driver.py             "$RUN_DIR/"
+cp run_driver.sh         "$RUN_DIR/"
+cp generate_dakota_in.py "$RUN_DIR/"
+cp plot_best.py          "$RUN_DIR/"
+
+# Resolve and copy the model config template so the archive is self-contained
+CONFIG=$($PYTHON -c "
+import yaml
+with open('$PARAMS') as f:
+    cfg = yaml.safe_load(f)
+print(cfg['driver']['config_template'])
+")
+cp "$CONFIG" "$RUN_DIR/"
+
+# --- work inside the run directory from here on ---
+cd "$RUN_DIR"
+
+# Regenerate dakota.in from this decade's params.yml
+$PYTHON generate_dakota_in.py --params params.yml
+
+# Pre-flight: initialise the model before spending 500+ evaluations on a bad config.
+$PYTHON - params.yml << 'PYEOF' || { echo "ERROR: Pre-flight config check failed. Aborting." >&2; exit 1; }
 import yaml, sys
 from mnished import Buckets
 with open(sys.argv[1]) as f:
@@ -101,8 +85,7 @@ PYEOF
 # Optimise
 $DAKOTA -i dakota.in -o dakota.out
 
-# Abort before archiving if every evaluation returned the penalty score —
-# indicates a model or config error rather than a genuine calibration result.
+# Abort if every evaluation returned the penalty score.
 $PYTHON -c '
 import sys
 PENALTY = 10.0
@@ -117,21 +100,19 @@ scores = [float(l.split()[col]) for l in lines
 if scores and all(abs(s - PENALTY) < 1e-9 for s in scores):
     n = len(scores)
     print(f"ERROR: all {n} evaluations returned PENALTY={PENALTY}; "
-          "model or config error. Aborting without archiving.", file=sys.stderr)
+          "model or config error. Aborting.", file=sys.stderr)
     sys.exit(1)
 ' || exit 1
 
+# Rename outputs to archive-friendly names
+mv dakota.dat evaluations.dat
+mv dakota.out dakota_log.txt
+
 # Save figure
-if $PYTHON plot_best.py --params "$PARAMS" --save best_fit.png --no-show; then
+if $PYTHON plot_best.py --params params.yml --save best_fit.png --no-show; then
     echo "Best-fit plot saved."
 else
-    echo "Warning: plot_best.py failed; archiving without plot." >&2
+    echo "Warning: plot_best.py failed; continuing without plot." >&2
 fi
 
-# Archive into the decade directory
-bash archive_run.sh "$DECADE_DIR" "$RUN_NAME"
-
-# Clean up ephemeral outputs so the next run.sh call starts clean
-rm -rf out dakota.dat dakota.out dakota.rst fort.13 LHS_*.out best_fit.png
-
-echo "=== Archived to ${DECADE_DIR}/runs/${RUN_NAME} ==="
+echo "=== Completed: ${RUN_DIR} ==="
