@@ -1,0 +1,39 @@
+decades:
+  1931-1940:
+    f_tile_soil: 0.789816
+    kge: 0.5472
+    n_valid: 801
+    run: 2026-06-18_135438_transient_v5.2
+  1941-1950:
+    f_tile_soil: 0.989999
+    kge: 0.5794
+    n_valid: 582
+    run: 2026-06-18_135438_transient_v5.2
+  1951-1960:
+    f_tile_soil: 0.222781
+    kge: 0.6888
+    n_valid: 783
+    run: 2026-06-18_135438_transient_v5.2
+  1961-1970:
+    f_tile_soil: 0.714053
+    kge: 0.6939
+    n_valid: 792
+    run: 2026-06-18_135438_transient_v5.2
+  1991-2000:
+    f_tile_soil: 0.927466
+    kge: 0.7894
+    n_valid: 551
+    run: 2026-06-18_135438_transient_v5.2
+  2001-2010:
+    f_tile_soil: 0.989999
+    kge: 0.5944
+    n_valid: 653
+    run: 2026-06-18_135438_transient_v5.2
+  2011-2020:
+    f_tile_soil: 0.989975
+    kge: 0.7707
+    n_valid: 751
+    run: 2026-06-18_135438_transient_v5.2
+desc: transient_v5.2
+mean_f_tile_soil: 0.803441
+mean_kge: 0.6663
