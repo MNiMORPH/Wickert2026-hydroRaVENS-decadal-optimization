@@ -1,10 +1,10 @@
 #!/bin/bash
 # Run the joint backbone calibration.
-# Uses driver_backbone.py (copied as driver.py in the run directory).
 # Run from cannon_river/
 #
-# Usage:  bash run_backbone.sh [description]
-# e.g.:   bash run_backbone.sh backbone_v1
+# Usage:  bash run_backbone.sh [description] [params_file] [driver_file]
+# e.g.:   bash run_backbone.sh backbone_v2
+#         bash run_backbone.sh backbone_v5.0 params_backbone_v5.0.yml driver_backbone_v5.0.py
 
 set -euo pipefail
 
@@ -16,13 +16,14 @@ RUN_DIR="backbone_runs/${RUN_NAME}"
 DAKOTA=${DAKOTA:-/home/awickert/anaconda3/envs/dakota-env/bin/dakota}
 PYTHON=${PYTHON:-/home/awickert/anaconda3/envs/dakota-env/bin/python}
 
-PARAMS="params_backbone.yml"
+PARAMS="${2:-params_backbone.yml}"
+DRIVER="${3:-driver_backbone.py}"
 
 echo "=== Backbone run: ${RUN_NAME} ==="
 mkdir -p "$RUN_DIR"
 
 # Copy backbone driver as driver.py so run_driver.sh and Dakota's copy_files work.
-cp driver_backbone.py   "$RUN_DIR/driver.py"
+cp "$DRIVER"            "$RUN_DIR/driver.py"
 cp run_driver.sh        "$RUN_DIR/"
 cp generate_dakota_in.py "$RUN_DIR/"
 cp plot_best.py         "$RUN_DIR/"
