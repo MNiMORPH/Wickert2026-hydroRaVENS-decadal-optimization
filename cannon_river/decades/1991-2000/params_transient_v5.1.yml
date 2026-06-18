@@ -1,3 +1,8 @@
+# 1991-2000: transient calibration v5.1.
+# Backbone fixed (backbone_v5.1); 4 active: log__recession_coeff_soil, f_tile_soil, f_exfiltration_soil, et_scale.
+# b_soil=2 fixed (Dupuit-Forchheimer); tau_tile fixed from backbone_v5.1.
+# spin_up_cycles=0 (chained from prior decade).
+
 modules:
   snowpack: true
   frozen_ground: true
@@ -59,59 +64,59 @@ parameters:
       — backbone_v5.0 fixed
     lower: 1.0
     upper: 5.0
-    initial: 4.999972672
-    fixed: 4.999972672
+    initial: 4.992194528
+    fixed: 4.992194528
     active: false
   log__recession_coeff_deep:
     description: log10 Wonewoc recession coefficient κ [days; e-folding time iff b=1]
       — backbone_v5.0 fixed
     lower: 3.0
     upper: 5.5
-    initial: 3.987847222
-    fixed: 3.987847222
+    initial: 4.227322946
+    fixed: 4.227322946
     active: false
   log__leakance_R_intermediate:
     description: log10 St. Lawrence shale leakance resistance [days] — backbone_v5.0
       fixed
     lower: 0.5
     upper: 5.0
-    initial: 1.490740741
-    fixed: 1.490740741
+    initial: 3.363403615
+    fixed: 3.363403615
     active: false
   f_exfiltration_deep:
     description: Wonewoc fraction to stream — backbone_v5.0 fixed
     lower: 0.01
     upper: 0.99
-    initial: 0.01000669528
-    fixed: 0.01000669528
+    initial: 0.3159580333
+    fixed: 0.3159580333
     active: false
   log__H_threshold_deep:
     description: log10 Wonewoc spring sill [mm] — backbone_v5.0 fixed
     lower: 0.0
     upper: 3.5
-    initial: 1.223381036
-    fixed: 1.223381036
+    initial: 1.720318276
+    fixed: 1.720318276
     active: false
   PDD_melt_factor:
     description: degree-day snowmelt rate — backbone_v5.0 fixed
     lower: 0.1
     upper: 10.0
-    initial: 5.502771267
-    fixed: 5.502771267
+    initial: 6.761753541
+    fixed: 6.761753541
     active: false
   log__fdd_threshold:
     description: log10 FGI threshold [degC·day] — backbone_v5.0 fixed
     lower: 0.0
     upper: 3.0
-    initial: 2.980895544
-    fixed: 2.980895544
+    initial: 2.656150521
+    fixed: 2.656150521
     active: false
   log__tau_tile:
     description: log10 tile-drain e-folding time [days] — backbone_v5.0 fixed
     lower: 0.0
     upper: 2.0
-    initial: 4.099151235e-05
-    fixed: 4.099151235e-05
+    initial: 0.005742743703
+    fixed: 0.005742743703
     active: false
   recession_b_soil:
     description: soil recession exponent — fixed at 2 (Dupuit-Forchheimer)
@@ -173,36 +178,36 @@ parameters:
     description: log10 initial soil H [mm] — set by IC chain
     lower: 0.0
     upper: 4.0
-    initial: 0.979088
-    fixed: 0.979088
+    initial: 1.7
+    fixed: 1.7
     active: false
   log__H0_intermediate:
     description: log10 initial PdC H [mm] — set by IC chain
     lower: 0.0
     upper: 5.0
-    initial: 3.029905
-    fixed: 3.029905
+    initial: 2.0
+    fixed: 2.0
     active: false
   log__H0_deep:
     description: log10 initial Wonewoc H [mm] — set by IC chain
     lower: 0.0
     upper: 5.0
-    initial: 3.009733
-    fixed: 3.009733
+    initial: 2.5
+    fixed: 2.5
     active: false
   H0_snowpack:
     description: initial snowpack SWE [mm] — set by IC chain
     lower: 0.0
     upper: 500.0
-    initial: 24.2913
-    fixed: 24.2913
+    initial: 0.0
+    fixed: 0.0
     active: false
   H0_fgi:
     description: initial frozen ground index [degC·day] — set by IC chain
     lower: 0.0
     upper: 500.0
-    initial: 282.5408
-    fixed: 282.5408
+    initial: 0.0
+    fixed: 0.0
     active: false
   H0_deficit_carry:
     description: initial ET deficit carry [mm] — 0 for first decade
