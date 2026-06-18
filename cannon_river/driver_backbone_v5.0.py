@@ -6,9 +6,6 @@ Active params (8): geologic + snow backbone + tau_tile, shared across decades.
 Fixed params: b_soil=2 (Dupuit-Forchheimer); f_tile_soil=0.3 (backbone
   representative; iterated with transient); per-decade soil/ET at mid-range.
 
-JIT note: f_tile > 0 disables the Numba JIT path; this driver runs the
-  Python loop. Expect ~10x longer wall time than backbone_v2.
-
 Each decade is scored independently using analytical steady-state ICs +
 spin_up_cycles=1 (no chaining). Returns mean KGE_logKGE across valid decades.
 """

@@ -5,9 +5,6 @@
 #         mid-century value; iterated with transient in v5.1+);
 #         per-decade soil/ET params held at mid-range for backbone search.
 #
-# JIT note: f_tile > 0 disables the Numba JIT path; backbone_v5.0 runs the
-#           Python loop. Expect ~10x longer wall time than backbone_v2.
-#
 # Full-coverage decades scored (>=3000 obs):
 #   1931-1940, 1941-1950, 1951-1960, 1961-1970,
 #   1991-2000, 2001-2010, 2011-2020

@@ -8,9 +8,6 @@ Fixed params: backbone (geology + snow + tau_tile), b_soil=2, H0 (chained).
 
 enforce_water_balance='none': et_scale carries the water-balance responsibility.
 
-JIT note: f_tile_soil > 0 disables the Numba JIT path; this driver runs the
-  Python loop. Expect ~10x longer wall time than backbone_v2 transient runs.
-
 Initial conditions:
   - If spin_up_cycles > 0 (first decade): analytical SS + spin-up on
     pre-decade data, then H0 values injected as post_spinup_states.
