@@ -70,7 +70,13 @@ def main():
     with open(args.ftile_summary) as f:
         ftile_data = yaml.safe_load(f)
     mean_ftile = float(ftile_data['mean_f_tile_soil'])
+    per_decade_ftile = {
+        decade: round(float(data['f_tile_soil']), 6)
+        for decade, data in ftile_data['decades'].items()
+    }
     print(f"Transient mean f_tile_soil = {mean_ftile:.4f}")
+    for dec, val in per_decade_ftile.items():
+        print(f"  {dec}: {val:.4f}")
 
     with open(args.from_params) as f:
         raw = f.read()
@@ -96,12 +102,15 @@ def main():
             n_updated += 1
     print(f"Updated {n_updated} active backbone param initials from best-fit")
 
-    # --- update f_tile_soil fixed value ---
+    # --- update f_tile_soil fixed value (mean; used as fallback in driver) ---
     if 'f_tile_soil' in params:
         old_ftile = params['f_tile_soil']['fixed']
         params['f_tile_soil']['fixed']   = round(mean_ftile, 6)
         params['f_tile_soil']['initial'] = round(mean_ftile, 6)
-        print(f"f_tile_soil: {old_ftile:.4f} → {mean_ftile:.4f}")
+        print(f"f_tile_soil: {old_ftile:.4f} → {mean_ftile:.4f} (mean; per-decade values in driver)")
+
+    # --- embed per-decade f_tile in driver section ---
+    cfg['driver']['per_decade_f_tile'] = per_decade_ftile
 
     # --- write output ---
     out_path = Path(f'params_backbone_v{next_ver}.yml')
@@ -109,12 +118,11 @@ def main():
         f.write(f"# Backbone calibration v{next_ver} — explicit tile-drain architecture.\n")
         f.write(f"#\n")
         f.write(f"# Iteration from backbone_v{prev_ver} (mean KGE={kge:.4f}).\n")
-        f.write(f"# f_tile_soil updated to transient_v{prev_ver} mean = {mean_ftile:.4f}.\n")
+        f.write(f"# f_tile_soil: per-decade values from transient_v{prev_ver} (mean={mean_ftile:.4f}).\n")
         f.write(f"# Active param initials seeded from backbone_v{prev_ver} best-fit.\n")
         f.write(f"#\n")
         f.write(f"# Active (8 params): geologic + snow backbone + tau_tile.\n")
-        f.write(f"# Fixed:  b_soil=2 (Dupuit-Forchheimer); "
-                f"f_tile_soil={mean_ftile:.4f} (transient_v{prev_ver} mean).\n")
+        f.write(f"# Fixed:  b_soil=2 (Dupuit-Forchheimer); f_tile per decade (driver.per_decade_f_tile).\n")
         f.write(f"#\n")
         yaml.dump(cfg, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
     print(f"Written: {out_path}")
