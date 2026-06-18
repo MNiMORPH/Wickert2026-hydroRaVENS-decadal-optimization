@@ -30,7 +30,7 @@ driver:
 
 parameters:
 
-  log__t_recession_soil:
+  log__recession_coeff_soil:
     description: "log10 soil-zone recession time scale [days]"
     lower:   1.0
     upper:   4.5
@@ -38,7 +38,7 @@ parameters:
     fixed:   4.493
     active:  true
 
-  log__t_recession_intermediate:
+  log__recession_coeff_intermediate:
     description: "log10 intermediate recession time scale [days]"
     lower:   1.0
     upper:   4.5
@@ -46,7 +46,7 @@ parameters:
     fixed:   1.021
     active:  true
 
-  log__t_recession_deep:
+  log__recession_coeff_deep:
     description: "log10 deep groundwater recession time scale [days]"
     lower:   3.5
     upper:   5.0

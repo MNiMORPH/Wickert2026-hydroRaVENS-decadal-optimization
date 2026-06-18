@@ -1,5 +1,11 @@
 # 2011-2020: independent calibration, 2011-01-01 to 2020-12-31.
-# A02 model structure: soil / intermediate / deep; frozen_ground enabled; k=8 active params.
+# A03 model structure: soil / intermediate / deep; frozen_ground enabled; k=13 active params.
+# Junctions:
+#   intermediate → deep:   leakance (Darcy seepage through St. Lawrence shale)
+#   intermediate → stream: remainder (dH − Q_leak); f_exfiltration_intermediate inactive
+#   deep: f_exfiltration_deep < 1 (vertical loss) + H_threshold_deep (spring sill)
+# τ_intermediate upper bound capped at 10^3.0 (1000 d) to prevent degeneracy where
+# both τ → upper bound and leakance absorbs all drainage (no stream contribution).
 
 modules:
   snowpack:          true
@@ -13,9 +19,9 @@ modules:
 dakota:
   ego_initial_samples:       300
   ego_seed:                  12345
-  ps_max_evaluations:        200
-  ps_convergence_tolerance:  1.0e-4
-  evaluation_concurrency:    4
+  ps_max_evaluations:        500
+  ps_convergence_tolerance:  1.0e-5
+  evaluation_concurrency:    8
 
 driver:
   config_template:       'cannon_config_1893_2024.yml'
@@ -30,7 +36,7 @@ driver:
 
 parameters:
 
-  log__t_recession_soil:
+  log__recession_coeff_soil:
     description: "log10 soil-zone recession time scale [days]"
     lower:   1.0
     upper:   4.5
@@ -38,15 +44,15 @@ parameters:
     fixed:   4.493
     active:  true
 
-  log__t_recession_intermediate:
-    description: "log10 intermediate recession time scale [days]"
+  log__recession_coeff_intermediate:
+    description: "log10 intermediate recession time scale [days]; capped at 3.0 to prevent leakance degeneracy"
     lower:   1.0
-    upper:   4.5
+    upper:   3.0
     initial: 1.021
     fixed:   1.021
     active:  true
 
-  log__t_recession_deep:
+  log__recession_coeff_deep:
     description: "log10 deep groundwater recession time scale [days]"
     lower:   3.5
     upper:   5.0
@@ -63,11 +69,35 @@ parameters:
     active:  true
 
   f_exfiltration_intermediate:
-    description: "fraction of intermediate drainage to stream (remainder recharges deep)"
+    description: "fraction of intermediate drainage to stream — inactive; leakance junction sends remainder (dH−Q_leak) to stream"
     lower:   0.01
     upper:   0.99
-    initial: 0.012
+    initial: 0.3
     fixed:   0.012
+    active:  false
+
+  log__leakance_R_intermediate:
+    description: "log10 leakance resistance through St. Lawrence shale confining unit [days]; Q_leak = max(H_inter - H_deep, 0) / R"
+    lower:   0.5
+    upper:   4.0
+    initial: 2.0
+    fixed:   2.0
+    active:  true
+
+  f_exfiltration_deep:
+    description: "fraction of above-threshold Wonewoc drainage to stream; remainder lost vertically to sub-stream units"
+    lower:   0.01
+    upper:   0.99
+    initial: 0.5
+    fixed:   0.5
+    active:  true
+
+  log__H_threshold_deep:
+    description: "log10 Wonewoc dead-storage threshold [mm]; springs inactive below this head, all drainage exits vertically"
+    lower:   0.0
+    upper:   3.5
+    initial: 1.5
+    fixed:   1.5
     active:  true
 
   PDD_melt_factor:
@@ -109,6 +139,30 @@ parameters:
     initial: 0.0
     fixed:   0.0
     active:  false
+
+  log__H0_soil:
+    description: "log10 initial soil-zone water depth [mm] — post-spin-up override"
+    lower:   1.0
+    upper:   4.0
+    initial: 2.5
+    fixed:   2.5
+    active:  true
+
+  log__H0_intermediate:
+    description: "log10 initial intermediate reservoir water depth [mm] — post-spin-up override"
+    lower:   1.0
+    upper:   4.5
+    initial: 2.5
+    fixed:   2.5
+    active:  true
+
+  log__H0_deep:
+    description: "log10 initial deep reservoir water depth [mm] — post-spin-up override"
+    lower:   1.0
+    upper:   4.5
+    initial: 2.5
+    fixed:   2.5
+    active:  true
 
   et_scale:
     description: "global ET multiplier — inactive (water balance enforced globally)"

@@ -2,7 +2,7 @@
 """
 Generate params_transient.yml for every decade directory, using:
   - Backbone fixed values from a completed backbone run (or command-line overrides)
-  - 4 active per-decade params: log__t_recession_soil, recession_b_soil,
+  - 4 active per-decade params: log__recession_coeff_soil, recession_b_soil,
     f_exfiltration_soil, et_scale
   - H0 params fixed at 0 initially (updated by run_transient.sh via chaining)
   - enforce_water_balance: 'none'  (et_scale owns the water balance)
@@ -22,8 +22,8 @@ from pathlib import Path
 # Defaults here are the geometric mean of 1931-1940 free and 2011-2020 results.
 # ---------------------------------------------------------------------------
 BACKBONE_DEFAULTS = {
-    'log__t_recession_intermediate': 3.0,
-    'log__t_recession_deep':         4.3,
+    'log__recession_coeff_intermediate': 3.0,
+    'log__recession_coeff_deep':         4.3,
     'log__leakance_R_intermediate':  3.75,
     'f_exfiltration_deep':           0.40,
     'log__H_threshold_deep':         2.1,
@@ -113,8 +113,8 @@ def make_params(decade_dir, backbone, start, end, is_first):
         },
         'parameters': {
             # ---- PER-DECADE ACTIVE (4) ----
-            'log__t_recession_soil': {
-                'description': 'log10 soil recession time scale [days]',
+            'log__recession_coeff_soil': {
+                'description': 'log10 soil recession coefficient [days]',
                 'lower': 1.0, 'upper': 4.5, 'initial': 3.5, 'fixed': 3.5,
                 'active': True,
             },
@@ -134,18 +134,18 @@ def make_params(decade_dir, backbone, start, end, is_first):
                 'active': True,
             },
             # ---- BACKBONE FIXED ----
-            'log__t_recession_intermediate': {
-                'description': 'log10 PdC recession time scale [days] — backbone fixed',
+            'log__recession_coeff_intermediate': {
+                'description': 'log10 PdC recession coefficient [days] — backbone fixed',
                 'lower': 1.0, 'upper': 5.0,
-                'initial': backbone['log__t_recession_intermediate'],
-                'fixed':   backbone['log__t_recession_intermediate'],
+                'initial': backbone['log__recession_coeff_intermediate'],
+                'fixed':   backbone['log__recession_coeff_intermediate'],
                 'active': False,
             },
-            'log__t_recession_deep': {
-                'description': 'log10 Wonewoc recession time scale [days] — backbone fixed',
+            'log__recession_coeff_deep': {
+                'description': 'log10 Wonewoc recession coefficient [days] — backbone fixed',
                 'lower': 3.0, 'upper': 5.5,
-                'initial': backbone['log__t_recession_deep'],
-                'fixed':   backbone['log__t_recession_deep'],
+                'initial': backbone['log__recession_coeff_deep'],
+                'fixed':   backbone['log__recession_coeff_deep'],
                 'active': False,
             },
             'log__leakance_R_intermediate': {
@@ -256,6 +256,11 @@ def make_params(decade_dir, backbone, start, end, is_first):
             'H0_fgi': {
                 'description': 'initial frozen ground index [degC·day] — set by IC chain',
                 'lower': 0.0, 'upper': 500.0, 'initial': 0.0, 'fixed': 0.0,
+                'active': False,
+            },
+            'H0_deficit_carry': {
+                'description': 'initial ET deficit carry [mm] — set by IC chain (0 for first decade)',
+                'lower': -1e6, 'upper': 1e6, 'initial': 0.0, 'fixed': 0.0,
                 'active': False,
             },
         },

@@ -1,9 +1,11 @@
 # 1931-1940: independent calibration, 1931-01-01 to 1940-12-31.
 # A03 model structure: soil / intermediate / deep; frozen_ground enabled; k=13 active params.
 # Junctions:
-#   intermediate → deep: leakance (St. Lawrence shale confining unit)
-#   deep: f_exfiltration_deep < 1 (vertical loss to sub-stream units) +
-#         H_threshold_deep (springs inactive below sill)
+#   intermediate → deep:   leakance (Darcy seepage through St. Lawrence shale)
+#   intermediate → stream: remainder (dH − Q_leak); f_exfiltration_intermediate inactive
+#   deep: f_exfiltration_deep < 1 (vertical loss) + H_threshold_deep (spring sill)
+# τ_intermediate bounds fully relaxed (upper=4.5); prior runs hit caps at 3.0 and 2.0.
+# Warm-started from A03_tau_cap best (KGE=0.614, τ_inter=2.999).
 
 modules:
   snowpack:          true
@@ -17,9 +19,9 @@ modules:
 dakota:
   ego_initial_samples:       300
   ego_seed:                  12345
-  ps_max_evaluations:        200
-  ps_convergence_tolerance:  1.0e-4
-  evaluation_concurrency:    4
+  ps_max_evaluations:        500
+  ps_convergence_tolerance:  1.0e-5
+  evaluation_concurrency:    8
 
 driver:
   config_template:       'cannon_config_1893_2024.yml'
@@ -34,43 +36,43 @@ driver:
 
 parameters:
 
-  log__t_recession_soil:
+  log__recession_coeff_soil:
     description: "log10 soil-zone recession time scale [days]"
     lower:   1.0
     upper:   4.5
-    initial: 4.493
-    fixed:   4.493
+    initial: 3.404
+    fixed:   3.404
     active:  true
 
-  log__t_recession_intermediate:
-    description: "log10 intermediate recession time scale [days]"
+  log__recession_coeff_intermediate:
+    description: "log10 intermediate recession time scale [days]; bounds relaxed to match soil upper bound"
     lower:   1.0
     upper:   4.5
-    initial: 1.021
-    fixed:   1.021
+    initial: 2.999
+    fixed:   2.999
     active:  true
 
-  log__t_recession_deep:
+  log__recession_coeff_deep:
     description: "log10 deep groundwater recession time scale [days]"
     lower:   3.5
     upper:   5.0
-    initial: 3.771
-    fixed:   3.771
+    initial: 4.381
+    fixed:   4.381
     active:  true
 
   f_exfiltration_soil:
     description: "fraction of soil-zone drainage to stream (remainder recharges intermediate)"
     lower:   0.01
     upper:   0.99
-    initial: 0.6662
-    fixed:   0.6662
+    initial: 0.4660
+    fixed:   0.4660
     active:  true
 
   f_exfiltration_intermediate:
-    description: "fraction of intermediate drainage to stream — inactive; replaced by leakance junction"
+    description: "fraction of intermediate drainage to stream — inactive; leakance junction sends remainder (dH−Q_leak) to stream"
     lower:   0.01
     upper:   0.99
-    initial: 0.012
+    initial: 0.2937
     fixed:   0.012
     active:  false
 
@@ -78,40 +80,40 @@ parameters:
     description: "log10 leakance resistance through St. Lawrence shale confining unit [days]; Q_leak = max(H_inter - H_deep, 0) / R"
     lower:   0.5
     upper:   4.0
-    initial: 2.0
-    fixed:   2.0
+    initial: 3.576
+    fixed:   3.576
     active:  true
 
   f_exfiltration_deep:
     description: "fraction of above-threshold Wonewoc drainage to stream; remainder lost vertically to sub-stream units"
     lower:   0.01
     upper:   0.99
-    initial: 0.5
-    fixed:   0.5
+    initial: 0.2395
+    fixed:   0.2395
     active:  true
 
   log__H_threshold_deep:
     description: "log10 Wonewoc dead-storage threshold [mm]; springs inactive below this head, all drainage exits vertically"
     lower:   0.0
     upper:   3.5
-    initial: 2.5
-    fixed:   2.5
+    initial: 2.343
+    fixed:   2.343
     active:  true
 
   PDD_melt_factor:
     description: "degree-day snowmelt rate [mm SWE / degC / day]"
     lower:   0.1
     upper:   10.0
-    initial: 7.8611
-    fixed:   7.8611
+    initial: 7.868
+    fixed:   7.868
     active:  true
 
   recession_b_soil:
     description: "power-law recession exponent for soil zone [dimensionless]"
     lower:   1.5
     upper:   6.0
-    initial: 5.4907
-    fixed:   5.4907
+    initial: 4.434
+    fixed:   4.434
     active:  true
 
   recession_b_intermediate:
@@ -126,8 +128,8 @@ parameters:
     description: "log10 frozen-ground-index threshold [degC·day]; blocks infiltration when exceeded"
     lower:   0.0
     upper:   3.0
-    initial: 2.502
-    fixed:   2.502
+    initial: 2.203
+    fixed:   2.203
     active:  true
 
   snow_insulation_k:
@@ -142,24 +144,24 @@ parameters:
     description: "log10 initial soil-zone water depth [mm] — post-spin-up override"
     lower:   1.0
     upper:   4.0
-    initial: 2.5
-    fixed:   2.5
+    initial: 1.429
+    fixed:   1.429
     active:  true
 
   log__H0_intermediate:
     description: "log10 initial intermediate reservoir water depth [mm] — post-spin-up override"
     lower:   1.0
     upper:   4.5
-    initial: 2.5
-    fixed:   2.5
+    initial: 1.922
+    fixed:   1.922
     active:  true
 
   log__H0_deep:
     description: "log10 initial deep reservoir water depth [mm] — post-spin-up override"
     lower:   1.0
     upper:   4.5
-    initial: 2.5
-    fixed:   2.5
+    initial: 2.365
+    fixed:   2.365
     active:  true
 
   et_scale:

@@ -280,7 +280,7 @@ def run_model(row):
     _pss, _pss_k  = _post_spinup_hwater(row)
     return run_and_score(
         CFG_TEMPLATE,
-        t_recession                = [10 ** _get(row, f'log__t_recession_{l}')
+        recession_coeff            = [10 ** _get(row, f'log__recession_coeff_{l}')
                                       for l in RESERVOIR_ORDER],
         f_to_discharge             = [_get(row, f'f_exfiltration_{l}')
                                       for l in RESERVOIR_ORDER
@@ -371,7 +371,7 @@ def make_plot(result, params_row, save_path):
 
     tau_parts = []
     for label in RESERVOIR_ORDER:
-        val = 10 ** _get(params_row, f'log__t_recession_{label}')
+        val = 10 ** _get(params_row, f'log__recession_coeff_{label}')
         lbl = _RES_LABEL.get(label, label)
         fmt = '.1f' if val < 10 else '.0f'
         tau_parts.append(f'$\\tau_{{{lbl}}}$ = {val:{fmt}} d')
@@ -542,9 +542,9 @@ if __name__ == '__main__':
     print(f'  metric           = {METRIC}')
     print(f'  reservoir_order  = {RESERVOIR_ORDER}')
     for label in RESERVOIR_ORDER:
-        val = 10 ** _get(best, f'log__t_recession_{label}')
+        val = 10 ** _get(best, f'log__recession_coeff_{label}')
         lbl = _RES_LABEL.get(label, label)
-        print(f'  t_recession_{lbl:<8} = {val:.1f} days')
+        print(f'  recession_coeff_{lbl:<5} = {val:.1f} days')
     params = _PARAMS or {}
     for label in RESERVOIR_ORDER:
         key = f'f_exfiltration_{label}'

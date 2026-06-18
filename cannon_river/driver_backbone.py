@@ -126,7 +126,7 @@ try:
         try:
             result = run_and_score(
                 CONFIG_TEMPLATE,
-                t_recession                    = [10 ** get(f'log__t_recession_{l}')
+                recession_coeff                = [10 ** get(f'log__recession_coeff_{l}')
                                                    for l in RESERVOIR_ORDER],
                 f_to_discharge                 = _f_dis,
                 leakance_R                     = _lr,

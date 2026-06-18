@@ -67,24 +67,24 @@ def _mrt(tau_col, b_col, b_fixed=None):
            else pd.Series(b_fixed, index=df.index))
     return tau ** (1.0 / b)
 
-if 'param_log__t_recession_soil' in df.columns:
+if 'param_log__recession_coeff_soil' in df.columns:
     b_col = ('param_recession_b_soil'
              if 'param_recession_b_soil' in df.columns else None)
     b_fix = 1.0 if b_col is None else None
-    df['mrt_soil'] = _mrt('param_log__t_recession_soil', b_col or '', b_fixed=b_fix)
+    df['mrt_soil'] = _mrt('param_log__recession_coeff_soil', b_col or '', b_fixed=b_fix)
 
-if 'param_log__t_recession_intermediate' in df.columns:
+if 'param_log__recession_coeff_intermediate' in df.columns:
     b_col = ('param_recession_b_intermediate'
              if 'param_recession_b_intermediate' in df.columns else None)
     b_fix = 2.203 if b_col is None else None   # Brutsaert-Nieber fixed value
-    df['mrt_intermediate'] = _mrt('param_log__t_recession_intermediate',
+    df['mrt_intermediate'] = _mrt('param_log__recession_coeff_intermediate',
                                   b_col or '', b_fixed=b_fix)
 
-if 'param_log__t_recession_deep' in df.columns:
+if 'param_log__recession_coeff_deep' in df.columns:
     b_col = ('param_recession_b_deep'
              if 'param_recession_b_deep' in df.columns else None)
     b_fix = 1.0 if b_col is None else None
-    df['mrt_deep'] = _mrt('param_log__t_recession_deep', b_col or '', b_fixed=b_fix)
+    df['mrt_deep'] = _mrt('param_log__recession_coeff_deep', b_col or '', b_fixed=b_fix)
 
 # ---------------------------------------------------------------------------
 # Panel definitions

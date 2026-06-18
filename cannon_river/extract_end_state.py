@@ -18,8 +18,13 @@ from pathlib import Path
 from mnished import run_and_score
 
 def _parse_evals(run_dir):
-    """Return the best-fit row as a dict from evaluations.dat."""
-    p = Path(run_dir) / 'evaluations.dat'
+    """Return the best-fit row as a dict from evaluations.dat (or dakota.dat)."""
+    for fname in ('evaluations.dat', 'dakota.dat'):
+        p = Path(run_dir) / fname
+        if p.exists():
+            break
+    else:
+        raise FileNotFoundError(f"No evaluations.dat or dakota.dat in {run_dir}")
     rows = []
     with open(p) as f:
         header = f.readline().lstrip('%').split()
@@ -116,15 +121,19 @@ def main():
 
     h0 = _h0_states()
     if spin_up == 0 and h0 is not None:
+        # Chained mode: H0 values are used directly as initial states; no spin-up.
         initial_states, post_spinup_states = h0, None
     else:
-        initial_states, post_spinup_states = None, h0
+        # First-decade spin-up: spin-up runs clean; H0 values are NOT injected
+        # after spin-up (that was the pre-June-2026 bug that corrupted ICs).
+        # The spin-up end states become the decade ICs directly.
+        initial_states, post_spinup_states = None, None
 
     et_scale_val = get('et_scale') if 'et_scale' in param_cfg else None
 
     result = run_and_score(
         str(run_dir / config_tmpl),
-        t_recession         = [10 ** get(f'log__t_recession_{l}') for l in res_order],
+        recession_coeff     = [10 ** get(f'log__recession_coeff_{l}') for l in res_order],
         f_to_discharge      = _f_discharge(),
         leakance_R          = _leakance_R(),
         H_threshold         = _H_threshold(),
@@ -151,8 +160,9 @@ def main():
         'kge': float(kge),
         'reservoirs': {res_order[i]: float(fs['reservoirs'][i])
                        for i in range(len(res_order))},
-        'snowpack': float(fs['snowpack']),
-        'fgi':      float(fs['fgi']),
+        'snowpack':        float(fs['snowpack']),
+        'fgi':             float(fs['fgi']),
+        'H_deficit_carry': float(fs.get('H_deficit_carry', 0.0)),
     }
 
     out_path = run_dir / 'final_states.yml'
@@ -162,8 +172,9 @@ def main():
     print(f"Written: {out_path}")
     for k, v in out['reservoirs'].items():
         print(f"  H_{k} = {v:.2f} mm")
-    print(f"  snowpack = {out['snowpack']:.2f} mm SWE")
-    print(f"  fgi      = {out['fgi']:.2f} °C·day")
+    print(f"  snowpack        = {out['snowpack']:.2f} mm SWE")
+    print(f"  fgi             = {out['fgi']:.2f} °C·day")
+    print(f"  H_deficit_carry = {out['H_deficit_carry']:.4f} mm")
 
 
 if __name__ == '__main__':

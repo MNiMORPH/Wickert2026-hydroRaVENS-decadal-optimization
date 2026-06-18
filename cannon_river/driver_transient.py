@@ -2,7 +2,7 @@
 """
 Per-decade transient Dakota driver.
 
-Active params (4): log__t_recession_soil, recession_b_soil,
+Active params (4): log__recession_coeff_soil, recession_b_soil,
                    f_exfiltration_soil, et_scale.
 Fixed params: backbone (geology + snow), H0 (chained from prior decade).
 
@@ -110,13 +110,15 @@ def _h0_states():
     for n in names:
         vals.append(10 ** float(_param_cfg[n]['fixed']) if n in _param_cfg else None)
     # snowpack and FGI chained states (not log-transformed)
-    snowpack = float(_param_cfg['H0_snowpack']['fixed']) if 'H0_snowpack' in _param_cfg else None
-    fgi      = float(_param_cfg['H0_fgi']['fixed'])      if 'H0_fgi'      in _param_cfg else None
+    snowpack        = float(_param_cfg['H0_snowpack']['fixed'])        if 'H0_snowpack'        in _param_cfg else None
+    fgi             = float(_param_cfg['H0_fgi']['fixed'])             if 'H0_fgi'             in _param_cfg else None
+    H_deficit_carry = float(_param_cfg['H0_deficit_carry']['fixed'])   if 'H0_deficit_carry'   in _param_cfg else 0.0
     state = {'reservoirs': vals}
     if snowpack is not None:
         state['snowpack'] = snowpack
     if fgi is not None:
         state['fgi'] = fgi
+    state['H_deficit_carry'] = H_deficit_carry
     return state
 
 
@@ -134,13 +136,15 @@ try:
         _initial_states     = _h0
         _post_spinup_states = None
     else:
-        # First-decade mode: spin up from analytical SS, then inject H0.
+        # First-decade mode: run clean pre-decade spin-up (1893-1930); its
+        # end states become the decade ICs directly. H0 params are not used
+        # as an override — the spin-up result is the physically grounded IC.
         _initial_states     = None
-        _post_spinup_states = _h0
+        _post_spinup_states = None
 
     result = run_and_score(
         CONFIG_TEMPLATE,
-        t_recession                    = [10 ** get(f'log__t_recession_{l}')
+        recession_coeff                = [10 ** get(f'log__recession_coeff_{l}')
                                            for l in RESERVOIR_ORDER],
         f_to_discharge                 = _f_dis,
         leakance_R                     = _lr,

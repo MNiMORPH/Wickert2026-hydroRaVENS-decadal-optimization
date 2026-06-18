@@ -50,16 +50,16 @@ parameters:
 
   # ---- BACKBONE (active) ----
 
-  log__t_recession_intermediate:
-    description: "log10 PdC recession time scale [days]"
+  log__recession_coeff_intermediate:
+    description: "log10 PdC recession coefficient [days]"
     lower:   1.0
     upper:   5.0
     initial: 3.0
     fixed:   3.0
     active:  true
 
-  log__t_recession_deep:
-    description: "log10 Wonewoc recession time scale [days]"
+  log__recession_coeff_deep:
+    description: "log10 Wonewoc recession coefficient [days]"
     lower:   3.0
     upper:   5.5
     initial: 4.3
@@ -108,8 +108,8 @@ parameters:
 
   # ---- SOIL (fixed at mid-range; calibrated per-decade in transient run) ----
 
-  log__t_recession_soil:
-    description: "log10 soil recession time scale [days] — fixed at mid-range for backbone search"
+  log__recession_coeff_soil:
+    description: "log10 soil recession coefficient [days] — fixed at mid-range for backbone search"
     lower:   1.0
     upper:   4.5
     initial: 3.9

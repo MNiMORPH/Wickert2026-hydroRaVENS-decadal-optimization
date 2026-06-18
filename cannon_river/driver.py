@@ -227,7 +227,7 @@ try:
     _ht, _ht_k               = _H_threshold()
     result = run_and_score(
         CONFIG_TEMPLATE,
-        t_recession                = [10 ** get(f'log__t_recession_{l}') for l in RESERVOIR_ORDER],
+        recession_coeff            = [10 ** get(f'log__recession_coeff_{l}') for l in RESERVOIR_ORDER],
         f_to_discharge         = [get(f'f_exfiltration_{l}')
                                    if (f'f_exfiltration_{l}' in _param_cfg
                                        and _param_cfg[f'f_exfiltration_{l}'].get('active', True))

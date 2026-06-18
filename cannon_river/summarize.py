@@ -285,7 +285,7 @@ for decade_dir in decade_dirs:
 
         result = run_and_score(
             config_tmpl,
-            t_recession            = [10 ** _get(f'log__t_recession_{l}')
+            recession_coeff        = [10 ** _get(f'log__recession_coeff_{l}')
                                       for l in reservoir_order],
             f_to_discharge         = [_get(f'f_exfiltration_{l}')
                                       for l in reservoir_order
