@@ -76,4 +76,8 @@ print(f"Best neg_kge={best:.6f}  (mean KGE={1-best:.4f})")
 mv dakota.dat evaluations.dat
 mv dakota.out dakota_log.txt
 
+# Remove per-evaluation scratch output (~2 GB/run); evaluations.dat holds all results.
+# Reached only after a successful run (set -euo pipefail + penalty check above).
+rm -rf out/
+
 echo "=== Completed: ${RUN_DIR} ==="

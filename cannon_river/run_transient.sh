@@ -199,6 +199,10 @@ print(f"Best neg_kge={best:.6f}  (KGE={1-best:.4f})")
     mv dakota.dat evaluations.dat
     mv dakota.out dakota_log.txt
 
+    # Remove per-evaluation scratch output (~2 GB/run); evaluations.dat holds all results.
+    # Reached only after a successful decade (penalty check above uses || continue, not exit).
+    rm -rf out/
+
     # Extract end-of-decade reservoir states for chaining
     if $PYTHON "$CANNON_RIVER_DIR/extract_end_state.py" .; then
         PREV_FINAL_STATES="$(pwd)/final_states.yml"
