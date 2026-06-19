@@ -6,7 +6,8 @@ v6.0 architecture:
   - backbone fixed: geology (5) + snow (2), from backbone_v6.0 evaluations.dat
   - b_soil=2 fixed (Dupuit-Forchheimer); no tile sub-reservoir
   - Hmax_soil = ∞ (v6.0 baseline; log__Hmax_soil added in v6.1+)
-  - 3 active per-decade params: log__recession_coeff_soil, f_exfiltration_soil, et_scale
+  - 4 active per-decade params: log__recession_coeff_soil, f_exfiltration_soil, et_scale,
+                                log__Hmax_soil
 
 Usage:
     python make_transient_params_v6.0.py --backbone backbone_runs/<run_dir>/evaluations.dat
@@ -114,6 +115,12 @@ def make_params(decade_dir, backbone, start, end, is_first, ver):
             'et_scale': {
                 'description': 'Thornthwaite ET multiplier (land cover / decade)',
                 'lower': 0.3, 'upper': 2.0, 'initial': 1.0, 'fixed': 1.0,
+                'active': True,
+            },
+            'log__Hmax_soil': {
+                'description': 'log10 soil reservoir max storage [mm] — tile-drain ceiling; '
+                               'large=undrained, small=heavily drained',
+                'lower': 1.0, 'upper': 3.0, 'initial': 2.7, 'fixed': 2.7,
                 'active': True,
             },
             # ---- BACKBONE FIXED ----
@@ -287,8 +294,8 @@ def main():
 
         with open(out_path, 'w') as f:
             f.write(f"# {decade_dir.name}: transient calibration v{ver}.\n")
-            f.write(f"# Backbone fixed (backbone_v{ver}); 3 active: "
-                    f"log__recession_coeff_soil, f_exfiltration_soil, et_scale.\n")
+            f.write(f"# Backbone fixed (backbone_v{ver}); 4 active: "
+                    f"log__recession_coeff_soil, f_exfiltration_soil, et_scale, log__Hmax_soil.\n")
             f.write(f"# b_soil=2 fixed; no tile sub-reservoir (v6 soil architecture).\n")
             if first_decade:
                 f.write(f"# spin_up_cycles=1 (first decade, analytical SS start).\n\n")

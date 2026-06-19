@@ -98,15 +98,11 @@ def _H_threshold():
 
 
 def _Hmax():
-    """Per-reservoir Hmax list, or None if no Hmax params present."""
-    vals = [None] * len(RESERVOIR_ORDER)
-    any_set = False
-    for i, l in enumerate(RESERVOIR_ORDER):
-        key = f'log__Hmax_{l}'
-        if key in _param_cfg:
-            vals[i] = 10 ** get(key)
-            any_set = True
-    return vals if any_set else None
+    """Per-reservoir Hmax list, or None if no Hmax params are present."""
+    if not any(f'log__Hmax_{l}' in _param_cfg for l in RESERVOIR_ORDER):
+        return None
+    return [10 ** get(f'log__Hmax_{l}') if f'log__Hmax_{l}' in _param_cfg else np.inf
+            for l in RESERVOIR_ORDER]
 
 
 def _h0_states():
