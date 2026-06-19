@@ -1,0 +1,179 @@
+# Backbone calibration v6.0 — soil-reservoir tile-drain architecture.
+#
+# Replaces v5.x explicit tile-drain sub-reservoir with modified soil reservoir:
+#   Tile drainage emulated by Hmax_soil (storage cap) + τ_recession_soil (drainage efficiency).
+#   v6.0: Hmax_soil = ∞ (no cap), τ_recession_soil fixed — baseline geology+snow.
+#   v6.1+: Hmax_soil and/or τ_recession_soil become active/per-decade parameters.
+#
+# Active (7 params): geologic (5) + snow (2).
+# Fixed: b_soil=2 (Dupuit-Forchheimer); log__recession_coeff_soil=3.5 (per-decade in transient).
+# Seeded from backbone_v5.0 best-fit (KGE=0.136).
+#
+modules:
+  snowpack: true
+  frozen_ground: true
+  rain_on_snow: true
+  direct_runoff: false
+  dtr_fgi_decay: true
+  et_water_stress: false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples: 500
+  ego_seed: 42
+  ps_max_evaluations: 1000
+  ps_convergence_tolerance: 1.0e-05
+  evaluation_concurrency: 8
+driver:
+  config_template: cannon_config_1893_2024.yml
+  metric: KGE_logKGE
+  spin_up_cycles: 1
+  routing_N: 2
+  n_reservoirs: 3
+  reservoir_order:
+  - soil
+  - intermediate
+  - deep
+  enforce_water_balance: global
+  min_obs: 3000
+  decades:
+  - start: '1931-01-01'
+    end: '1940-12-31'
+  - start: '1941-01-01'
+    end: '1950-12-31'
+  - start: '1951-01-01'
+    end: '1960-12-31'
+  - start: '1961-01-01'
+    end: '1970-12-31'
+  - start: '1991-01-01'
+    end: '2000-12-31'
+  - start: '2001-01-01'
+    end: '2010-12-31'
+  - start: '2011-01-01'
+    end: '2020-12-31'
+parameters:
+  log__recession_coeff_intermediate:
+    description: log10 PdC recession coefficient κ [days; e-folding time iff b=1]
+    lower: 1.0
+    upper: 5.0
+    initial: 5.0
+    fixed: 5.0
+    active: true
+  log__recession_coeff_deep:
+    description: log10 Wonewoc recession coefficient κ [days; e-folding time iff b=1]
+    lower: 3.0
+    upper: 5.5
+    initial: 3.987847
+    fixed: 3.987847
+    active: true
+  log__leakance_R_intermediate:
+    description: log10 St. Lawrence shale leakance resistance [days]
+    lower: 0.5
+    upper: 5.0
+    initial: 1.490741
+    fixed: 1.490741
+    active: true
+  f_exfiltration_deep:
+    description: fraction of above-threshold Wonewoc drainage to stream
+    lower: 0.01
+    upper: 0.99
+    initial: 0.010007
+    fixed: 0.010007
+    active: true
+  log__H_threshold_deep:
+    description: log10 Wonewoc dead-storage threshold [mm]
+    lower: 0.0
+    upper: 3.5
+    initial: 1.223381
+    fixed: 1.223381
+    active: true
+  PDD_melt_factor:
+    description: degree-day snowmelt rate [mm SWE / degC / day]
+    lower: 0.1
+    upper: 10.0
+    initial: 5.502771
+    fixed: 5.502771
+    active: true
+  log__fdd_threshold:
+    description: log10 frozen-ground-index threshold [degC·day]
+    lower: 0.0
+    upper: 3.0
+    initial: 2.980896
+    fixed: 2.980896
+    active: true
+  log__recession_coeff_soil:
+    description: log10 soil recession coefficient κ [days] — fixed for backbone; per-decade in transient
+    lower: 1.0
+    upper: 4.5
+    initial: 3.5
+    fixed: 3.5
+    active: false
+  recession_b_soil:
+    description: soil recession exponent — fixed at 2 (Dupuit-Forchheimer lateral flow)
+    lower: 1.5
+    upper: 6.0
+    initial: 2.0
+    fixed: 2.0
+    active: false
+  f_exfiltration_soil:
+    description: fraction of soil drainage to stream — fixed at mid-range; per-decade in transient
+    lower: 0.01
+    upper: 0.99
+    initial: 0.53
+    fixed: 0.53
+    active: false
+  f_exfiltration_intermediate:
+    description: dead param under leakance junction
+    lower: 0.01
+    upper: 0.99
+    initial: 0.012
+    fixed: 0.012
+    active: false
+  recession_b_intermediate:
+    description: PdC recession exponent — Brutsaert-Nieber fixed
+    lower: 1.0
+    upper: 6.0
+    initial: 2.203
+    fixed: 2.203
+    active: false
+  snow_insulation_k:
+    description: snow insulation — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  et_scale:
+    description: ET multiplier — inactive (global WB enforcement)
+    lower: 0.5
+    upper: 2.0
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  et_alpha:
+    description: ET partition fraction — fixed
+    lower: 0.01
+    upper: 0.99
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  f_direct_runoff:
+    description: fast-bypass fraction — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  baseflow_Q:
+    description: regional groundwater import — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  log__routing_K:
+    description: Nash-cascade K — inactive
+    lower: -1.0
+    upper: 1.0
+    initial: 0.0
+    fixed: 0.0
+    active: false
