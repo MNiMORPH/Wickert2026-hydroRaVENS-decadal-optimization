@@ -210,7 +210,7 @@ for ax, (col, lbl, transform, ylabel, note) in zip(axes, PANELS):
             label='reliable')
     if len(x_rel) >= 2:
         with warnings.catch_warnings():
-            warnings.simplefilter('ignore', np.RankWarning)
+            warnings.simplefilter('ignore', np.exceptions.RankWarning)
             p = np.polyfit(x_rel, y_rel, 1)
         ax.plot(x_rel, np.polyval(p, x_rel), '-', color='steelblue',
                 lw=1.5, alpha=0.6)
