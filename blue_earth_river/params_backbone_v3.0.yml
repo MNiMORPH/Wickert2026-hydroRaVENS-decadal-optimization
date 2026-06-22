@@ -1,0 +1,132 @@
+# Backbone calibration v3.0 — 1-reservoir till+tile architecture (Blue Earth River).
+#
+# Single reservoir representing the combined till+tile system:
+#   - b=2 (Dupuit-Forchheimer): both vertical and lateral flow through till see the same ksat
+#   - Hmax: effective storage ceiling (pore space above tile depth)
+#   - κ per-decade in transient (tile density changes effective drainage rate)
+#
+# Snow-only backbone: PDD and FGI threshold are the only time-invariant parameters.
+# Geological params (κ_till, Hmax_till) are per-decade in the transient; fixed here at
+# v2.0 transient means as seed values.
+#
+# Active (2 params): PDD_melt_factor, log__fdd_threshold.
+# Fixed: recession_b_till=2 (Dupuit-Forchheimer); κ_till and Hmax_till at v2.0 means.
+# Decades: 1951-2020 (7 full-coverage decades).
+#
+modules:
+  snowpack: true
+  frozen_ground: true
+  rain_on_snow: true
+  direct_runoff: false
+  dtr_fgi_decay: true
+  et_water_stress: false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples: 200
+  ego_seed: 42
+  ps_max_evaluations: 500
+  ps_convergence_tolerance: 1.0e-05
+  evaluation_concurrency: 8
+driver:
+  config_template: blue_earth_config_v3.yml
+  metric: KGE_logKGE
+  spin_up_cycles: 1
+  routing_N: 2
+  n_reservoirs: 1
+  reservoir_order:
+  - till
+  enforce_water_balance: global
+  min_obs: 3000
+  decades:
+  - start: '1951-01-01'
+    end: '1960-12-31'
+  - start: '1961-01-01'
+    end: '1970-12-31'
+  - start: '1971-01-01'
+    end: '1980-12-31'
+  - start: '1981-01-01'
+    end: '1990-12-31'
+  - start: '1991-01-01'
+    end: '2000-12-31'
+  - start: '2001-01-01'
+    end: '2010-12-31'
+  - start: '2011-01-01'
+    end: '2020-12-31'
+parameters:
+  PDD_melt_factor:
+    description: degree-day snowmelt rate [mm SWE / degC / day]
+    lower: 0.1
+    upper: 10.0
+    initial: 5.0
+    fixed: 5.0
+    active: true
+  log__fdd_threshold:
+    description: log10 frozen-ground-index threshold [degC·day]
+    lower: 0.0
+    upper: 3.0
+    initial: 2.5
+    fixed: 2.5
+    active: true
+  log__recession_coeff_till:
+    description: log10 till+tile recession coefficient κ [days] — fixed at v2.0 mean; per-decade in transient
+    lower: 1.0
+    upper: 4.5
+    initial: 1.9486
+    fixed: 1.9486
+    active: false
+  log__Hmax_till:
+    description: log10 till+tile max storage [mm] — fixed at v2.0 mean; per-decade in transient
+    lower: 1.0
+    upper: 4.0
+    initial: 2.5817
+    fixed: 2.5817
+    active: false
+  recession_b_till:
+    description: till+tile recession exponent — fixed at 2 (Dupuit-Forchheimer)
+    lower: 1.0
+    upper: 3.0
+    initial: 2.0
+    fixed: 2.0
+    active: false
+  snow_insulation_k:
+    description: snow insulation — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  et_scale:
+    description: ET multiplier — inactive (global WB enforcement in backbone)
+    lower: 0.5
+    upper: 2.0
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  et_alpha:
+    description: ET partition fraction — fixed
+    lower: 0.01
+    upper: 0.99
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  f_direct_runoff:
+    description: fast-bypass fraction — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  baseflow_Q:
+    description: regional groundwater import — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  log__routing_K:
+    description: Nash-cascade K — inactive
+    lower: -1.0
+    upper: 1.0
+    initial: 0.0
+    fixed: 0.0
+    active: false

@@ -1,0 +1,121 @@
+# D2b: Static calibration baseline (no per-decade params) with b=1.15 (D1 data-informed).
+#
+# Tests the v3 architecture without per-decade hydraulic freedom, using the
+# storage-discharge exponent extracted from Brutsaert-Nieber recession analysis
+# (D1: pooled b_BN=1.142 → b_storage=1.166, rounded to 1.15).
+#
+# Compare KGE to (a) D2a's b=2 result, (b) v3.x's 0.681 transient mean.
+#
+# Active (4): PDD_melt_factor, log__fdd_threshold,
+#             log__recession_coeff_till, log__Hmax_till.
+# Fixed: recession_b_till = 1.15 (D1 MRC pooled fit).
+# Driver: driver_backbone_v3.0.py (falls back to global params when no per_decade_k_till).
+modules:
+  snowpack: true
+  frozen_ground: true
+  rain_on_snow: true
+  direct_runoff: false
+  dtr_fgi_decay: true
+  et_water_stress: false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples: 200
+  ego_seed: 42
+  ps_max_evaluations: 500
+  ps_convergence_tolerance: 1.0e-5
+  evaluation_concurrency: 8
+driver:
+  config_template: blue_earth_config_v3.yml
+  metric: KGE_logKGE
+  spin_up_cycles: 1
+  routing_N: 2
+  n_reservoirs: 1
+  reservoir_order: [till]
+  enforce_water_balance: global
+  min_obs: 3000
+  decades:
+    - {start: '1951-01-01', end: '1960-12-31'}
+    - {start: '1961-01-01', end: '1970-12-31'}
+    - {start: '1971-01-01', end: '1980-12-31'}
+    - {start: '1981-01-01', end: '1990-12-31'}
+    - {start: '1991-01-01', end: '2000-12-31'}
+    - {start: '2001-01-01', end: '2010-12-31'}
+    - {start: '2011-01-01', end: '2020-12-31'}
+parameters:
+  PDD_melt_factor:
+    description: degree-day snowmelt rate [mm SWE / degC / day]
+    lower: 0.1
+    upper: 10.0
+    initial: 5.0
+    fixed: 5.0
+    active: true
+  log__fdd_threshold:
+    description: log10 frozen-ground-index threshold [degC·day]
+    lower: 0.0
+    upper: 3.0
+    initial: 2.0
+    fixed: 2.0
+    active: true
+  log__recession_coeff_till:
+    description: log10 till+tile recession coefficient κ [days]
+    lower: 0.0
+    upper: 3.5
+    initial: 2.0
+    fixed: 2.0
+    active: true
+  log__Hmax_till:
+    description: log10 till+tile maximum effective depth [mm]
+    lower: 1.0
+    upper: 3.5
+    initial: 2.5
+    fixed: 2.5
+    active: true
+  recession_b_till:
+    description: till+tile recession exponent b — fixed at D1 MRC pooled fit (b≈1.15)
+    lower: 1.0
+    upper: 4.5
+    initial: 1.15
+    fixed: 1.15
+    active: false
+  snow_insulation_k:
+    description: snow insulation — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  et_scale:
+    description: ET multiplier — inactive (global WB enforcement)
+    lower: 0.5
+    upper: 2.0
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  et_alpha:
+    description: ET partition fraction — fixed
+    lower: 0.01
+    upper: 0.99
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  f_direct_runoff:
+    description: fast-bypass fraction — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  baseflow_Q:
+    description: regional groundwater import — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  log__routing_K:
+    description: Nash-cascade K — inactive
+    lower: -1.0
+    upper: 1.0
+    initial: 0.0
+    fixed: 0.0
+    active: false

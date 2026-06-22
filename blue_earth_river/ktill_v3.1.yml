@@ -1,0 +1,63 @@
+decades:
+  1951-1960:
+    Hmax_till_mm: 2749.6
+    kappa_till_days: 226.52
+    kge: 0.5383
+    log__Hmax_till: 3.439265
+    log__recession_coeff_till: 2.355102
+    n_valid: 443
+    run: 2026-06-19_134449_transient_v3.1
+  1961-1970:
+    Hmax_till_mm: 464.2
+    kappa_till_days: 243.19
+    kge: 0.5843
+    log__Hmax_till: 2.666664
+    log__recession_coeff_till: 2.385937
+    n_valid: 444
+    run: 2026-06-19_134449_transient_v3.1
+  1971-1980:
+    Hmax_till_mm: 1520.4
+    kappa_till_days: 853.34
+    kge: 0.617
+    log__Hmax_till: 3.181959
+    log__recession_coeff_till: 2.931122
+    n_valid: 465
+    run: 2026-06-19_134449_transient_v3.1
+  1981-1990:
+    Hmax_till_mm: 1903.8
+    kappa_till_days: 299.44
+    kge: 0.7164
+    log__Hmax_till: 3.279629
+    log__recession_coeff_till: 2.476314
+    n_valid: 466
+    run: 2026-06-19_134449_transient_v3.1
+  1991-2000:
+    Hmax_till_mm: 9999.9
+    kappa_till_days: 178.96
+    kge: 0.8309
+    log__Hmax_till: 3.999997
+    log__recession_coeff_till: 2.252763
+    n_valid: 363
+    run: 2026-06-19_134449_transient_v3.1
+  2001-2010:
+    Hmax_till_mm: 8458.5
+    kappa_till_days: 150.47
+    kge: 0.7062
+    log__Hmax_till: 3.927295
+    log__recession_coeff_till: 2.177442
+    n_valid: 427
+    run: 2026-06-19_134449_transient_v3.1
+  2011-2020:
+    Hmax_till_mm: 180.1
+    kappa_till_days: 120.3
+    kge: 0.7706
+    log__Hmax_till: 2.255553
+    log__recession_coeff_till: 2.08025
+    n_valid: 460
+    run: 2026-06-19_134449_transient_v3.1
+desc: transient_v3.1
+mean_Hmax_till_mm: 1778.5
+mean_kappa_till_days: 239.8
+mean_kge: 0.6805
+mean_log__Hmax_till: 3.250052
+mean_log__recession_coeff_till: 2.379847

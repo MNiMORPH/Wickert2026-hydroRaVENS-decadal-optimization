@@ -1,0 +1,139 @@
+# Backbone calibration v5.1 — 1-reservoir till+tile, free b (Blue Earth River).
+#
+# Iteration from backbone_v5.0 (mean KGE=0.6346).
+# log__recession_coeff_till: per-decade from transient_v5.0 (mean=3.0148, κ=1034.7 d).
+# recession_b_till: per-decade from transient_v5.0 (mean=2.9733).
+# Active param initials (PDD, FGI) seeded from backbone_v5.0 best-fit.
+#
+# Active (2 params): PDD_melt_factor, log__fdd_threshold (snow-only).
+# Fixed: κ_till and b_till per decade (driver.per_decade_k_till / per_decade_b_till).
+# No Hmax.
+#
+modules:
+  snowpack: true
+  frozen_ground: true
+  rain_on_snow: true
+  direct_runoff: false
+  dtr_fgi_decay: true
+  et_water_stress: false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples: 200
+  ego_seed: 42
+  ps_max_evaluations: 500
+  ps_convergence_tolerance: 1.0e-05
+  evaluation_concurrency: 8
+driver:
+  config_template: blue_earth_config_v5.yml
+  metric: KGE_logKGE
+  spin_up_cycles: 1
+  routing_N: 2
+  n_reservoirs: 1
+  reservoir_order:
+  - till
+  enforce_water_balance: global
+  min_obs: 3000
+  decades:
+  - start: '1951-01-01'
+    end: '1960-12-31'
+  - start: '1961-01-01'
+    end: '1970-12-31'
+  - start: '1971-01-01'
+    end: '1980-12-31'
+  - start: '1981-01-01'
+    end: '1990-12-31'
+  - start: '1991-01-01'
+    end: '2000-12-31'
+  - start: '2001-01-01'
+    end: '2010-12-31'
+  - start: '2011-01-01'
+    end: '2020-12-31'
+  per_decade_k_till:
+    1951-1960: 2.716798
+    1961-1970: 3.007481
+    1971-1980: 3.630913
+    1981-1990: 3.089505
+    1991-2000: 3.056126
+    2001-2010: 2.961051
+    2011-2020: 2.641669
+  per_decade_b_till:
+    1951-1960: 2.999998
+    1961-1970: 2.999997
+    1971-1980: 2.999998
+    1981-1990: 2.999998
+    1991-2000: 3.0
+    2001-2010: 2.999999
+    2011-2020: 2.813014
+parameters:
+  PDD_melt_factor:
+    description: degree-day snowmelt rate [mm SWE / degC / day]
+    lower: 0.1
+    upper: 10.0
+    initial: 4.365283
+    fixed: 4.365283
+    active: true
+  log__fdd_threshold:
+    description: log10 frozen-ground-index threshold [degC·day]
+    lower: 0.0
+    upper: 3.0
+    initial: 2.826153
+    fixed: 2.826153
+    active: true
+  log__recession_coeff_till:
+    description: log10 till+tile recession coefficient κ [days] — fixed at v3.x mean;
+      per-decade in transient
+    lower: 1.0
+    upper: 4.5
+    initial: 3.014792
+    fixed: 3.014792
+    active: false
+  recession_b_till:
+    description: till+tile recession exponent b — fixed at global mean; per-decade
+      in transient
+    lower: 1.0
+    upper: 3.0
+    initial: 2.973286
+    fixed: 2.973286
+    active: false
+  snow_insulation_k:
+    description: snow insulation — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  et_scale:
+    description: ET multiplier — inactive (global WB enforcement in backbone)
+    lower: 0.5
+    upper: 2.0
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  et_alpha:
+    description: ET partition fraction — fixed
+    lower: 0.01
+    upper: 0.99
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  f_direct_runoff:
+    description: fast-bypass fraction — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  baseflow_Q:
+    description: regional groundwater import — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  log__routing_K:
+    description: Nash-cascade K — inactive
+    lower: -1.0
+    upper: 1.0
+    initial: 0.0
+    fixed: 0.0
+    active: false

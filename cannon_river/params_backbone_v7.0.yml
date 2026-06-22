@@ -1,0 +1,159 @@
+# Cannon v7.0 backbone: multipath on top (soil) reservoir.
+#
+# Architecture:
+#   - 3 reservoirs as in Cannon v6 (soil + intermediate/PdC + deep/Wonewoc)
+#   - Soil: b=1 linear matrix + multipath threshold-activated parallel drain; no Hmax cap
+#   - Intermediate + deep: fixed at v6.3 backbone best-fit
+#
+# Active (7): PDD_melt_factor, log__fdd_threshold,
+#             log__recession_coeff_soil (matrix τ),
+#             log__multipath_threshold_soil, log__multipath_timescale_soil,
+#             f_exfiltration_soil, et_scale
+# Fixed at v6.3: intermediate + deep reservoir params (5 total).
+# Fixed model:   recession_b_soil = 1.0 (linear matrix), Hmax_soil = 1e6 (no cap)
+#
+# Baselines: Cannon v6.3 backbone = 0.619, v6.3 transient mean = 0.737.
+modules:
+  snowpack:          true
+  frozen_ground:     true
+  rain_on_snow:      true
+  direct_runoff:     false
+  dtr_fgi_decay:     true
+  et_water_stress:   false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples:      300
+  ego_seed:                 42
+  ps_max_evaluations:       1500
+  ps_convergence_tolerance: 1.0e-5
+  evaluation_concurrency:   8
+driver:
+  config_template:       cannon_config_v7.yml
+  metric:                KGE_logKGE
+  spin_up_cycles:        1
+  routing_N:             2
+  n_reservoirs:          3
+  reservoir_order:       [soil, intermediate, deep]
+  enforce_water_balance: none
+  min_obs:               3000
+  decades:
+    - {start: '1931-01-01', end: '1940-12-31'}
+    - {start: '1941-01-01', end: '1950-12-31'}
+    - {start: '1951-01-01', end: '1960-12-31'}
+    - {start: '1961-01-01', end: '1970-12-31'}
+    - {start: '1991-01-01', end: '2000-12-31'}
+    - {start: '2001-01-01', end: '2010-12-31'}
+    - {start: '2011-01-01', end: '2020-12-31'}
+parameters:
+  PDD_melt_factor:
+    description: degree-day snowmelt rate [mm SWE / degC / day]
+    lower: 0.1
+    upper: 10.0
+    initial: 5.64
+    fixed: 5.64
+    active: true
+  log__fdd_threshold:
+    description: log10 frozen-ground-index threshold [degC·day]
+    lower: 0.0
+    upper: 4.0
+    initial: 2.96
+    fixed: 2.96
+    active: true
+  log__recession_coeff_soil:
+    description: log10 soil matrix recession timescale τ [days]
+    lower: 0.5
+    upper: 4.0
+    initial: 1.78
+    fixed: 1.78
+    active: true
+  log__multipath_threshold_soil:
+    description: log10 multipath activation depth H_thr [mm SWE storage]
+    lower: 0.5
+    upper: 3.0
+    initial: 1.7
+    fixed: 1.7
+    active: true
+  log__multipath_timescale_soil:
+    description: log10 multipath drain timescale τ_mp [days]
+    lower: 0.0
+    upper: 2.0
+    initial: 0.7
+    fixed: 0.7
+    active: true
+  f_exfiltration_soil:
+    description: soil-reservoir matrix-outflow fraction to stream vs. infiltration
+    lower: 0.0
+    upper: 1.0
+    initial: 0.76
+    fixed: 0.76
+    active: true
+  et_scale:
+    description: Thornthwaite ET scaling — calibrated
+    lower: 0.3
+    upper: 2.0
+    initial: 0.83
+    fixed: 0.83
+    active: true
+  log__recession_coeff_intermediate:
+    description: log10 intermediate τ — v6.3 fixed
+    lower: 0.5
+    upper: 5.0
+    initial: 4.2016
+    fixed: 4.2016
+    active: false
+  log__recession_coeff_deep:
+    description: log10 deep τ — v6.3 fixed
+    lower: 0.5
+    upper: 5.0
+    initial: 3.0962
+    fixed: 3.0962
+    active: false
+  f_exfiltration_deep:
+    description: deep-reservoir threshold-junction outflow fraction — v6.3 fixed
+    lower: 0.0
+    upper: 1.0
+    initial: 0.5857
+    fixed: 0.5857
+    active: false
+  recession_b_soil:
+    description: b_soil — fixed at 1.0 (linear; multipath carries shape)
+    lower: 1.0
+    upper: 4.5
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  snow_insulation_k:
+    description: snow insulation — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  f_direct_runoff:
+    description: fast-bypass fraction — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  baseflow_Q:
+    description: regional groundwater import — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  log__routing_K:
+    description: Nash-cascade K — inactive
+    lower: -1.0
+    upper: 1.0
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  et_alpha:
+    description: ET partition fraction — fixed
+    lower: 0.01
+    upper: 0.99
+    initial: 1.0
+    fixed: 1.0
+    active: false

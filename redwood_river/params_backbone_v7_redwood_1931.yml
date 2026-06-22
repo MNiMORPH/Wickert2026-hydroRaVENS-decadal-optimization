@@ -1,0 +1,162 @@
+# Redwood River v7 (2-reservoir) backbone, 1931-2020 (9 decades).
+#
+# Architecture chosen because Redwood's mixed substrate (till + outwash + loess
+# capped on slower deeper till; no productive deep aquifer like Cannon's
+# Wonewoc sandstone) is best represented as two hydraulic units:
+#   - soil (top):  surface till + outwash + loess + tile  (multipath active)
+#   - deep:        saturated deeper till matrix, slow baseflow
+# 2 reservoirs, not 3, because Sioux Quartzite below provides no productive
+# third storage — the deep storage is just slower till of the same general type.
+#
+# Active (6): PDD, log_κ_soil, log_H_thr_soil, log_τ_mp_soil, f_exfil_soil,
+#             log_κ_deep.
+# Fixed:      et_scale = 0.755 (BLR D3 mean), b_soil = b_deep = 1.0, FGI off.
+#
+# Compare to v6 (1-reservoir, KGE = 0.587). Test whether mixed substrate
+# benefits from the 2-reservoir treatment.
+modules:
+  snowpack:          true
+  frozen_ground:     false
+  rain_on_snow:      true
+  direct_runoff:     false
+  dtr_fgi_decay:     false
+  et_water_stress:   false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples:      300
+  ego_seed:                 42
+  ps_max_evaluations:       1500
+  ps_convergence_tolerance: 1.0e-5
+  evaluation_concurrency:   8
+driver:
+  config_template:       redwood_config_v7_2res.yml
+  metric:                KGE_logKGE
+  spin_up_cycles:        1
+  routing_N:             2
+  n_reservoirs:          2
+  reservoir_order:       [soil, deep]
+  enforce_water_balance: none
+  min_obs:               2000
+  decades:
+    - {start: '1931-01-01', end: '1940-12-31'}
+    - {start: '1941-01-01', end: '1950-12-31'}
+    - {start: '1951-01-01', end: '1960-12-31'}
+    - {start: '1961-01-01', end: '1970-12-31'}
+    - {start: '1971-01-01', end: '1980-12-31'}
+    - {start: '1981-01-01', end: '1990-12-31'}
+    - {start: '1991-01-01', end: '2000-12-31'}
+    - {start: '2001-01-01', end: '2010-12-31'}
+    - {start: '2011-01-01', end: '2020-12-31'}
+parameters:
+  PDD_melt_factor:
+    description: degree-day snowmelt rate [mm SWE / degC / day]
+    lower: 0.1
+    upper: 10.0
+    initial: 5.0
+    fixed: 5.0
+    active: true
+  log__recession_coeff_soil:
+    description: log10 soil matrix recession timescale τ [days]
+    lower: 0.5
+    upper: 4.0
+    initial: 2.0
+    fixed: 2.0
+    active: true
+  log__multipath_threshold_soil:
+    description: log10 multipath activation depth H_thr [mm]
+    lower: 0.5
+    upper: 3.0
+    initial: 2.0
+    fixed: 2.0
+    active: true
+  log__multipath_timescale_soil:
+    description: log10 multipath drain timescale τ_mp [days]
+    lower: 0.0
+    upper: 2.0
+    initial: 1.0
+    fixed: 1.0
+    active: true
+  f_exfiltration_soil:
+    description: soil-reservoir matrix outflow fraction to stream
+    lower: 0.0
+    upper: 1.0
+    initial: 0.5
+    fixed: 0.5
+    active: true
+  log__recession_coeff_deep:
+    description: log10 deep matrix recession timescale τ [days]
+    lower: 1.0
+    upper: 5.0
+    initial: 3.0
+    fixed: 3.0
+    active: true
+  recession_b_soil:
+    description: b_soil — fixed at 1.0 (linear matrix)
+    lower: 1.0
+    upper: 4.5
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  recession_b_deep:
+    description: b_deep — fixed at 1.0 (linear)
+    lower: 1.0
+    upper: 4.5
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  et_scale:
+    description: Thornthwaite ET scaling — fixed at BLR D3 mean
+    lower: 0.3
+    upper: 2.0
+    initial: 0.755
+    fixed: 0.755
+    active: false
+  log__fdd_threshold:
+    description: FGI threshold — inactive (frozen_ground off)
+    lower: 0.0
+    upper: 4.0
+    initial: 4.0
+    fixed: 4.0
+    active: false
+  f_exfiltration_deep:
+    description: deep reservoir — all to stream (mass conservation at bottom)
+    lower: 0.0
+    upper: 1.0
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  snow_insulation_k:
+    description: snow insulation — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  f_direct_runoff:
+    description: fast-bypass fraction — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  baseflow_Q:
+    description: regional groundwater import — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  log__routing_K:
+    description: Nash-cascade K — inactive
+    lower: -1.0
+    upper: 1.0
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  et_alpha:
+    description: ET partition fraction — fixed
+    lower: 0.01
+    upper: 0.99
+    initial: 1.0
+    fixed: 1.0
+    active: false

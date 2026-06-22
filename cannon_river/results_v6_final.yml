@@ -1,0 +1,322 @@
+description: Cannon River MNiShed v6 calibration — final results
+architecture:
+  version: v6
+  reservoirs:
+  - soil
+  - intermediate (PdC)
+  - deep (Wonewoc)
+  tile_drainage: emulated via soil reservoir recession_coeff and Hmax; no explicit
+    tile sub-reservoir
+  b_soil: 2.0
+  junction_intermediate: leakance (log__leakance_R_intermediate)
+  junction_deep: threshold (log__H_threshold_deep)
+  metric: KGE_logKGE (mean of linear KGE and log-space KGE)
+kge_progression:
+  v6.0:
+    backbone: 0.262162
+    transient_mean: 0.721877
+  v6.1:
+    backbone: 0.631768
+    transient_mean: 0.734986
+  v6.2:
+    backbone: 0.607684
+    transient_mean: 0.73764
+  v6.3:
+    backbone: 0.618963
+    transient_mean: 0.737197
+backbone:
+  v6.0:
+    KGE_logKGE: 0.262162
+    n_valid_evals: 1609
+    best_fit:
+      eval_id: 615.0
+      log__recession_coeff_intermediate: 4.997257
+      log__recession_coeff_deep: 3.860597
+      log__leakance_R_intermediate: 1.490741
+      f_exfiltration_deep: 0.302387
+      log__H_threshold_deep: 1.159465
+      PDD_melt_factor: 8.87963
+      log__fdd_threshold: 2.67284
+  v6.1:
+    KGE_logKGE: 0.631768
+    n_valid_evals: 1605
+    best_fit:
+      eval_id: 1600.0
+      log__recession_coeff_intermediate: 4.81466
+      log__recession_coeff_deep: 3.001784
+      log__leakance_R_intermediate: 0.824074
+      f_exfiltration_deep: 0.581219
+      log__H_threshold_deep: 1.303498
+      PDD_melt_factor: 5.465142
+      log__fdd_threshold: 2.960442
+  v6.2:
+    KGE_logKGE: 0.607684
+    n_valid_evals: 1612
+    best_fit:
+      eval_id: 1607.0
+      log__recession_coeff_intermediate: 4.382716
+      log__recession_coeff_deep: 3.019772
+      log__leakance_R_intermediate: 1.990741
+      f_exfiltration_deep: 0.587042
+      log__H_threshold_deep: 1.173868
+      PDD_melt_factor: 5.853484
+      log__fdd_threshold: 2.960442
+  v6.3:
+    KGE_logKGE: 0.618963
+    n_valid_evals: 1604
+    best_fit:
+      eval_id: 1603.0
+      log__recession_coeff_intermediate: 4.201646
+      log__recession_coeff_deep: 3.096193
+      log__leakance_R_intermediate: 0.990741
+      f_exfiltration_deep: 0.585662
+      log__H_threshold_deep: 1.159465
+      PDD_melt_factor: 5.637558
+      log__fdd_threshold: 2.960442
+transient:
+  v6.0:
+    decades:
+      1931-1940:
+        KGE_logKGE: 0.557381
+        n_valid_evals: 800
+        log__recession_coeff_soil: 2.156525
+        tau_soil_days: 143.39
+        f_exfiltration_soil: 0.862663
+        log__Hmax_soil: 2.542803
+        et_scale: 0.948265
+      1941-1950:
+        KGE_logKGE: 0.664376
+        n_valid_evals: 804
+        log__recession_coeff_soil: 1.779623
+        tau_soil_days: 60.2
+        f_exfiltration_soil: 0.621029
+        log__Hmax_soil: 2.950566
+        et_scale: 0.693008
+      1951-1960:
+        KGE_logKGE: 0.677079
+        n_valid_evals: 804
+        log__recession_coeff_soil: 1.84476
+        tau_soil_days: 69.95
+        f_exfiltration_soil: 0.583563
+        log__Hmax_soil: 2.757303
+        et_scale: 0.759739
+      1961-1970:
+        KGE_logKGE: 0.784847
+        n_valid_evals: 802
+        log__recession_coeff_soil: 1.623994
+        tau_soil_days: 42.07
+        f_exfiltration_soil: 0.489196
+        log__Hmax_soil: 2.060426
+        et_scale: 0.794847
+      1991-2000:
+        KGE_logKGE: 0.780132
+        n_valid_evals: 599
+        log__recession_coeff_soil: 1.727399
+        tau_soil_days: 53.38
+        f_exfiltration_soil: 0.72347
+        log__Hmax_soil: 2.125861
+        et_scale: 0.757578
+      2001-2010:
+        KGE_logKGE: 0.746226
+        n_valid_evals: 572
+        log__recession_coeff_soil: 1.743916
+        tau_soil_days: 55.45
+        f_exfiltration_soil: 0.984459
+        log__Hmax_soil: 2.613118
+        et_scale: 1.071977
+      2011-2020:
+        KGE_logKGE: 0.8431
+        n_valid_evals: 795
+        log__recession_coeff_soil: 1.784867
+        tau_soil_days: 60.93
+        f_exfiltration_soil: 0.658236
+        log__Hmax_soil: 2.925875
+        et_scale: 0.652407
+    mean_KGE_logKGE: 0.721877
+  v6.1:
+    decades:
+      1931-1940:
+        KGE_logKGE: 0.561277
+        n_valid_evals: 595
+        log__recession_coeff_soil: 2.000456
+        tau_soil_days: 100.11
+        f_exfiltration_soil: 0.761269
+        log__Hmax_soil: 2.584565
+        et_scale: 0.932343
+      1941-1950:
+        KGE_logKGE: 0.682546
+        n_valid_evals: 776
+        log__recession_coeff_soil: 1.853421
+        tau_soil_days: 71.35
+        f_exfiltration_soil: 0.812441
+        log__Hmax_soil: 2.82711
+        et_scale: 0.771441
+      1951-1960:
+        KGE_logKGE: 0.702585
+        n_valid_evals: 605
+        log__recession_coeff_soil: 1.737711
+        tau_soil_days: 54.67
+        f_exfiltration_soil: 0.720418
+        log__Hmax_soil: 2.497892
+        et_scale: 0.844251
+      1961-1970:
+        KGE_logKGE: 0.710043
+        n_valid_evals: 801
+        log__recession_coeff_soil: 1.441673
+        tau_soil_days: 27.65
+        f_exfiltration_soil: 0.706147
+        log__Hmax_soil: 2.1257
+        et_scale: 0.955401
+      1991-2000:
+        KGE_logKGE: 0.81588
+        n_valid_evals: 586
+        log__recession_coeff_soil: 1.694798
+        tau_soil_days: 49.52
+        f_exfiltration_soil: 0.757546
+        log__Hmax_soil: 2.308693
+        et_scale: 0.750407
+      2001-2010:
+        KGE_logKGE: 0.817505
+        n_valid_evals: 730
+        log__recession_coeff_soil: 1.776813
+        tau_soil_days: 59.82
+        f_exfiltration_soil: 0.879897
+        log__Hmax_soil: 2.713306
+        et_scale: 0.884637
+      2011-2020:
+        KGE_logKGE: 0.855065
+        n_valid_evals: 782
+        log__recession_coeff_soil: 1.656836
+        tau_soil_days: 45.38
+        f_exfiltration_soil: 0.669674
+        log__Hmax_soil: 2.851903
+        et_scale: 0.700172
+    mean_KGE_logKGE: 0.734986
+  v6.2:
+    decades:
+      1931-1940:
+        KGE_logKGE: 0.561092
+        n_valid_evals: 805
+        log__recession_coeff_soil: 2.002459
+        tau_soil_days: 100.57
+        f_exfiltration_soil: 0.745976
+        log__Hmax_soil: 2.122573
+        et_scale: 0.919921
+      1941-1950:
+        KGE_logKGE: 0.680401
+        n_valid_evals: 567
+        log__recession_coeff_soil: 1.877625
+        tau_soil_days: 75.44
+        f_exfiltration_soil: 0.831851
+        log__Hmax_soil: 2.555606
+        et_scale: 0.776767
+      1951-1960:
+        KGE_logKGE: 0.699215
+        n_valid_evals: 575
+        log__recession_coeff_soil: 1.750141
+        tau_soil_days: 56.25
+        f_exfiltration_soil: 0.733075
+        log__Hmax_soil: 2.207997
+        et_scale: 0.847483
+      1961-1970:
+        KGE_logKGE: 0.730637
+        n_valid_evals: 603
+        log__recession_coeff_soil: 1.624762
+        tau_soil_days: 42.15
+        f_exfiltration_soil: 0.700576
+        log__Hmax_soil: 2.070622
+        et_scale: 0.884615
+      1991-2000:
+        KGE_logKGE: 0.818311
+        n_valid_evals: 530
+        log__recession_coeff_soil: 1.781788
+        tau_soil_days: 60.5
+        f_exfiltration_soil: 0.777873
+        log__Hmax_soil: 2.13747
+        et_scale: 0.767848
+      2001-2010:
+        KGE_logKGE: 0.815303
+        n_valid_evals: 661
+        log__recession_coeff_soil: 1.776294
+        tau_soil_days: 59.74
+        f_exfiltration_soil: 0.843203
+        log__Hmax_soil: 2.333384
+        et_scale: 0.8496
+      2011-2020:
+        KGE_logKGE: 0.858518
+        n_valid_evals: 804
+        log__recession_coeff_soil: 1.657499
+        tau_soil_days: 45.45
+        f_exfiltration_soil: 0.69218
+        log__Hmax_soil: 2.259208
+        et_scale: 0.730745
+    mean_KGE_logKGE: 0.73764
+  v6.3:
+    decades:
+      1931-1940:
+        KGE_logKGE: 0.561973
+        n_valid_evals: 605
+        log__recession_coeff_soil: 1.990518
+        tau_soil_days: 97.84
+        f_exfiltration_soil: 0.743518
+        log__Hmax_soil: 2.522786
+        et_scale: 0.923848
+      1941-1950:
+        KGE_logKGE: 0.682046
+        n_valid_evals: 590
+        log__recession_coeff_soil: 1.87189
+        tau_soil_days: 74.45
+        f_exfiltration_soil: 0.832736
+        log__Hmax_soil: 2.226083
+        et_scale: 0.778968
+      1951-1960:
+        KGE_logKGE: 0.701238
+        n_valid_evals: 594
+        log__recession_coeff_soil: 1.749037
+        tau_soil_days: 56.11
+        f_exfiltration_soil: 0.734471
+        log__Hmax_soil: 2.167454
+        et_scale: 0.849952
+      1961-1970:
+        KGE_logKGE: 0.720119
+        n_valid_evals: 780
+        log__recession_coeff_soil: 1.642226
+        tau_soil_days: 43.88
+        f_exfiltration_soil: 0.697136
+        log__Hmax_soil: 2.074604
+        et_scale: 0.880024
+      1991-2000:
+        KGE_logKGE: 0.819671
+        n_valid_evals: 595
+        log__recession_coeff_soil: 1.78215
+        tau_soil_days: 60.55
+        f_exfiltration_soil: 0.778955
+        log__Hmax_soil: 2.137071
+        et_scale: 0.769856
+      2001-2010:
+        KGE_logKGE: 0.81669
+        n_valid_evals: 798
+        log__recession_coeff_soil: 1.773157
+        tau_soil_days: 59.31
+        f_exfiltration_soil: 0.839565
+        log__Hmax_soil: 2.407458
+        et_scale: 0.848272
+      2011-2020:
+        KGE_logKGE: 0.858638
+        n_valid_evals: 666
+        log__recession_coeff_soil: 1.660403
+        tau_soil_days: 45.75
+        f_exfiltration_soil: 0.693014
+        log__Hmax_soil: 2.942438
+        et_scale: 0.732508
+    mean_KGE_logKGE: 0.737197
+notes:
+- No temporal trend detected in per-decade soil-zone parameters (log__recession_coeff_soil,
+  f_exfiltration_soil, log__Hmax_soil, et_scale) across 1931-2020.
+- 'This is interpreted as: (a) Cannon River basin may have been heavily tiled before
+  the calibration window; (b) decadal climate variability may dominate over land-use
+  change signal; (c) 1971-1990 data gap breaks continuity.'
+- '1961-1970 is a persistent outlier: KGE=0.785 in v6.0 (fixed geology) but 0.720-0.731
+  in v6.x. Warrants investigation.'
+- 'Best calibration: v6.3 transient (backbone KGE=0.619, transient mean KGE=0.737).
+  v6.2 and v6.3 transients are statistically indistinguishable at the mean.'

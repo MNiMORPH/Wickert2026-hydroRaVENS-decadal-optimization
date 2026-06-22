@@ -1,0 +1,155 @@
+# Backbone calibration v2.0 — 3-reservoir soil/shallow_till/deep_till architecture (Blue Earth River).
+#
+# Des Moines Lobe till split into two layers:
+#   shallow till — weathered/fractured upper till, active on seasonal–annual timescales
+#   deep till    — dense basal till (+ glaciolacustrine interbeds), slow decadal drainage
+#
+# 3 reservoirs: soil (b=2 Dupuit-Forchheimer, Hmax calibrated per-decade)
+#             → shallow till (b=1 linear, 50% to stream / 50% to deep till)
+#             → deep till (b=1 linear, all to stream)
+#
+# Active (4 params): shallow+deep till recession (2) + snow/FGI (2).
+# Fixed: b_soil=2; log__recession_coeff_soil=1.782 (per-decade in transient);
+#        f_exfiltration_shallow_till=0.5 (backbone fixed; per-decade candidates for v3+).
+# Decades: 1951-2020 (7 full-coverage decades).
+#
+modules:
+  snowpack: true
+  frozen_ground: true
+  rain_on_snow: true
+  direct_runoff: false
+  dtr_fgi_decay: true
+  et_water_stress: false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples: 200
+  ego_seed: 42
+  ps_max_evaluations: 500
+  ps_convergence_tolerance: 1.0e-05
+  evaluation_concurrency: 8
+driver:
+  config_template: blue_earth_config_v2.yml
+  metric: KGE_logKGE
+  spin_up_cycles: 1
+  routing_N: 2
+  n_reservoirs: 3
+  reservoir_order:
+  - soil
+  - shallow_till
+  - deep_till
+  enforce_water_balance: global
+  min_obs: 3000
+  decades:
+  - start: '1951-01-01'
+    end: '1960-12-31'
+  - start: '1961-01-01'
+    end: '1970-12-31'
+  - start: '1971-01-01'
+    end: '1980-12-31'
+  - start: '1981-01-01'
+    end: '1990-12-31'
+  - start: '1991-01-01'
+    end: '2000-12-31'
+  - start: '2001-01-01'
+    end: '2010-12-31'
+  - start: '2011-01-01'
+    end: '2020-12-31'
+parameters:
+  log__recession_coeff_shallow_till:
+    description: log10 shallow till recession timescale τ [days; b=1 linear]
+    lower: 1.0
+    upper: 5.0
+    initial: 3.5
+    fixed: 3.5
+    active: true
+  log__recession_coeff_deep_till:
+    description: log10 deep/dense till recession timescale τ [days; b=1 linear]
+    lower: 2.5
+    upper: 5.5
+    initial: 4.5
+    fixed: 4.5
+    active: true
+  PDD_melt_factor:
+    description: degree-day snowmelt rate [mm SWE / degC / day]
+    lower: 0.1
+    upper: 10.0
+    initial: 5.0
+    fixed: 5.0
+    active: true
+  log__fdd_threshold:
+    description: log10 frozen-ground-index threshold [degC·day]
+    lower: 0.0
+    upper: 3.0
+    initial: 2.5
+    fixed: 2.5
+    active: true
+  log__recession_coeff_soil:
+    description: log10 soil recession coefficient κ [days] — fixed for backbone; per-decade in transient
+    lower: 1.0
+    upper: 4.5
+    initial: 1.782
+    fixed: 1.782
+    active: false
+  recession_b_soil:
+    description: soil recession exponent — fixed at 2 (Dupuit-Forchheimer lateral flow)
+    lower: 1.5
+    upper: 6.0
+    initial: 2.0
+    fixed: 2.0
+    active: false
+  f_exfiltration_soil:
+    description: fraction of soil drainage to stream — fixed at 0.7 in backbone; per-decade in transient
+    lower: 0.01
+    upper: 0.99
+    initial: 0.70
+    fixed: 0.70
+    active: false
+  f_exfiltration_shallow_till:
+    description: fraction of shallow till drainage to stream (remainder to deep till) — backbone fixed
+    lower: 0.01
+    upper: 0.99
+    initial: 0.50
+    fixed: 0.50
+    active: false
+  snow_insulation_k:
+    description: snow insulation — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  et_scale:
+    description: ET multiplier — inactive (global WB enforcement in backbone)
+    lower: 0.5
+    upper: 2.0
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  et_alpha:
+    description: ET partition fraction — fixed
+    lower: 0.01
+    upper: 0.99
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  f_direct_runoff:
+    description: fast-bypass fraction — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  baseflow_Q:
+    description: regional groundwater import — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  log__routing_K:
+    description: Nash-cascade K — inactive
+    lower: -1.0
+    upper: 1.0
+    initial: 0.0
+    fixed: 0.0
+    active: false

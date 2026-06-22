@@ -1,0 +1,146 @@
+# Backbone calibration v1.1 — 2-reservoir soil/till architecture (Blue Earth River).
+#
+# Iteration from backbone_v1.0 (mean KGE=0.0453).
+# log__recession_coeff_soil: per-decade from transient_v1.0 (mean=1.7643, τ=58.1 d).
+# Active param initials seeded from backbone_v1.0 best-fit.
+#
+# Active (3 params): till recession (1) + snow/FGI (2).
+# Fixed: b_soil=2 (Dupuit-Forchheimer); log__recession_coeff_soil per decade (driver.per_decade_k_soil).
+#
+modules:
+  snowpack: true
+  frozen_ground: true
+  rain_on_snow: true
+  direct_runoff: false
+  dtr_fgi_decay: true
+  et_water_stress: false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples: 200
+  ego_seed: 42
+  ps_max_evaluations: 500
+  ps_convergence_tolerance: 1.0e-05
+  evaluation_concurrency: 8
+driver:
+  config_template: blue_earth_config_v1.yml
+  metric: KGE_logKGE
+  spin_up_cycles: 1
+  routing_N: 2
+  n_reservoirs: 2
+  reservoir_order:
+  - soil
+  - till
+  enforce_water_balance: global
+  min_obs: 3000
+  decades:
+  - start: '1951-01-01'
+    end: '1960-12-31'
+  - start: '1961-01-01'
+    end: '1970-12-31'
+  - start: '1971-01-01'
+    end: '1980-12-31'
+  - start: '1981-01-01'
+    end: '1990-12-31'
+  - start: '1991-01-01'
+    end: '2000-12-31'
+  - start: '2001-01-01'
+    end: '2010-12-31'
+  - start: '2011-01-01'
+    end: '2020-12-31'
+  per_decade_k_soil:
+    1951-1960: 1.329184
+    1961-1970: 1.640694
+    1971-1980: 1.873111
+    1981-1990: 2.060152
+    1991-2000: 1.900164
+    2001-2010: 1.788381
+    2011-2020: 1.758583
+parameters:
+  log__recession_coeff_till:
+    description: log10 shallow till recession coefficient κ [days; e-folding time
+      for b=1]
+    lower: 1.0
+    upper: 5.0
+    initial: 1.219692
+    fixed: 1.219692
+    active: true
+  PDD_melt_factor:
+    description: degree-day snowmelt rate [mm SWE / degC / day]
+    lower: 0.1
+    upper: 10.0
+    initial: 6.142479
+    fixed: 6.142479
+    active: true
+  log__fdd_threshold:
+    description: log10 frozen-ground-index threshold [degC·day]
+    lower: 0.0
+    upper: 3.0
+    initial: 2.995597
+    fixed: 2.995597
+    active: true
+  log__recession_coeff_soil:
+    description: log10 soil recession coefficient κ [days] — fixed for backbone; per-decade
+      in transient
+    lower: 1.0
+    upper: 4.5
+    initial: 1.764324
+    fixed: 1.764324
+    active: false
+  recession_b_soil:
+    description: soil recession exponent — fixed at 2 (Dupuit-Forchheimer lateral
+      flow)
+    lower: 1.5
+    upper: 6.0
+    initial: 2.0
+    fixed: 2.0
+    active: false
+  f_exfiltration_soil:
+    description: fraction of soil drainage to stream — fixed at mid-range; per-decade
+      in transient
+    lower: 0.01
+    upper: 0.99
+    initial: 0.7
+    fixed: 0.7
+    active: false
+  snow_insulation_k:
+    description: snow insulation — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  et_scale:
+    description: ET multiplier — inactive (global WB enforcement in backbone)
+    lower: 0.5
+    upper: 2.0
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  et_alpha:
+    description: ET partition fraction — fixed
+    lower: 0.01
+    upper: 0.99
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  f_direct_runoff:
+    description: fast-bypass fraction — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  baseflow_Q:
+    description: regional groundwater import — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  log__routing_K:
+    description: Nash-cascade K — inactive
+    lower: -1.0
+    upper: 1.0
+    initial: 0.0
+    fixed: 0.0
+    active: false

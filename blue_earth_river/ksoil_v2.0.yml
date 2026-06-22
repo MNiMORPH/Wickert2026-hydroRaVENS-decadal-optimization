@@ -1,0 +1,47 @@
+decades:
+  1951-1960:
+    kge: 0.6978
+    log__recession_coeff_soil: 1.629099
+    n_valid: 803
+    run: 2026-06-19_113216_transient_v2.0
+    tau_soil_days: 42.57
+  1961-1970:
+    kge: 0.7632
+    log__recession_coeff_soil: 1.779986
+    n_valid: 802
+    run: 2026-06-19_113216_transient_v2.0
+    tau_soil_days: 60.25
+  1971-1980:
+    kge: 0.6627
+    log__recession_coeff_soil: 2.314308
+    n_valid: 725
+    run: 2026-06-19_113216_transient_v2.0
+    tau_soil_days: 206.21
+  1981-1990:
+    kge: 0.7733
+    log__recession_coeff_soil: 2.11131
+    n_valid: 691
+    run: 2026-06-19_113216_transient_v2.0
+    tau_soil_days: 129.21
+  1991-2000:
+    kge: 0.8647
+    log__recession_coeff_soil: 2.026555
+    n_valid: 728
+    run: 2026-06-19_113216_transient_v2.0
+    tau_soil_days: 106.31
+  2001-2010:
+    kge: 0.7693
+    log__recession_coeff_soil: 1.91164
+    n_valid: 673
+    run: 2026-06-19_113216_transient_v2.0
+    tau_soil_days: 81.59
+  2011-2020:
+    kge: 0.7881
+    log__recession_coeff_soil: 1.866964
+    n_valid: 637
+    run: 2026-06-19_113216_transient_v2.0
+    tau_soil_days: 73.61
+desc: transient_v2.0
+mean_kge: 0.7599
+mean_log__recession_coeff_soil: 1.948552
+mean_tau_soil_days: 88.83

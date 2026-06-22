@@ -1,0 +1,49 @@
+timeseries:
+  datafile: /home/awickert/dataanalysis/Wickert2026-hydroRaVENS-decadal-optimization/centroid_forcing_backup/redwood_river_forcing_centroid.csv
+
+initial_conditions:
+  water_reservoir_effective_depths__mm:
+    - 50.0      # soil (top): surface till + outwash + loess
+    - 500.0     # deep: slow saturated till matrix above Sioux Quartzite
+
+  snowpack__mm_SWE: 0
+
+catchment:
+  drainage_basin_area__km2: 1621.1
+  evapotranspiration_method: ThorntwaiteChang2019
+  water_year_start_month: 10
+  baseflow_Q: 0.0
+
+general:
+  spin_up_cycles: 1
+
+reservoirs:
+  recession_timescales__days:
+    - 100       # soil matrix τ (placeholder; calibrated)
+    - 1000      # deep τ (placeholder; calibrated)
+  exfiltration_fractions:
+    - 0.5       # soil: partition to stream vs deep (calibrated)
+    - 1.0       # deep: all to stream (mass conservation at bottom)
+  maximum_effective_depths__mm:
+    - 1000000.0     # no cap on soil
+    - .inf
+  multipath_thresholds__mm:
+    - 50.0      # soil — placeholder; calibrated
+    - null      # deep — off
+  multipath_timescales__days:
+    - 5.0       # soil — placeholder; calibrated
+    - null
+  recession_exponents:
+    - 1.0       # soil: linear matrix (b=1); shape comes from multipath
+    - 1.0       # deep: linear (b=1)
+
+snowmelt:
+  PDD_melt_factor: 5.0
+  fgi_decay_coeff: 0.97
+  snow_insulation_k: 0.0
+
+modules:
+  snowpack: true
+  frozen_ground: true
+  rain_on_snow: true
+  direct_runoff: false

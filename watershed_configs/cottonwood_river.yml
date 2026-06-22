@@ -1,0 +1,36 @@
+# Cottonwood River near New Ulm, MN (USGS 05317000)
+# Drainage area: ~1,300 sq mi / ~3,367 km²
+# Discharge record: 1909-07-01 to present
+#   - 1910s: 1219 Q-days (too sparse to use)
+#   - 1920s gap
+#   - 1930s: 2562 days (relaxed-usable)
+#   - 1940s onward: continuous full coverage
+# Substrate: Des Moines lobe glacial till (similar to BLR, LSR; pure till)
+# Forcing start: 1905 gives ~5 yr spin-up before first scored decade (1931-1940)
+
+name:  cottonwood_river
+gauge: "05317000"
+title: "Cottonwood River near New Ulm"
+grass_location: CottonwoodRiver
+grass_epsg: 32615
+
+forcing:
+  start:       '1905-01-01'
+  end:         '2024-12-31'
+  csv_name:    cottonwood_forcing.csv
+  config_name: cottonwood_config_1905_2024.yml
+
+decades:
+  first_year: 1911
+  last_year:  2021
+
+# Warm-start values inherited from prior MNiShed runs; refined per-decade
+initial_params:
+  log__t_recession_soil:         4.493
+  log__t_recession_intermediate: 1.021
+  log__t_recession_deep:         3.771
+  f_exfiltration_soil:           0.6662
+  f_exfiltration_intermediate:   0.0120
+  PDD_melt_factor:               7.8611
+  recession_b_soil:              5.4907
+  log__fdd_threshold:            2.502

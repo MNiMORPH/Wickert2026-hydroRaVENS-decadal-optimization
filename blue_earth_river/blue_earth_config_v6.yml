@@ -1,0 +1,41 @@
+timeseries:
+  datafile: /home/awickert/dataanalysis/Wickert2026-hydroRaVENS-decadal-optimization/centroid_forcing_backup/blue_earth_river_forcing_centroid.csv
+
+initial_conditions:
+  water_reservoir_effective_depths__mm:
+    - 50.0      # till+tile reservoir (placeholder; analytical SS init via spin-up)
+  snowpack__mm_SWE: 0
+
+catchment:
+  drainage_basin_area__km2: 6270.9
+  evapotranspiration_method: ThorntwaiteChang2019
+  water_year_start_month: 10
+  baseflow_Q: 0.0
+
+general:
+  spin_up_cycles: 1
+
+reservoirs:
+  recession_timescales__days:
+    - 100       # matrix τ (placeholder; calibrated)
+  exfiltration_fractions:
+    - 1.0       # all to stream (single bottom reservoir)
+  maximum_effective_depths__mm:
+    - 1000000.0     # no Hmax in v6; set large so config never constrains
+  multipath_thresholds__mm:
+    - 50.0      # H_thr (placeholder; calibrated)
+  multipath_timescales__days:
+    - 5.0       # τ_mp (placeholder; calibrated)
+  recession_exponents:
+    - 1.0       # b=1 (linear matrix); shape comes from multipath threshold
+
+snowmelt:
+  PDD_melt_factor: 5.0
+  fgi_decay_coeff: 0.97
+  snow_insulation_k: 0.0
+
+modules:
+  snowpack: true
+  frozen_ground: true
+  rain_on_snow: true
+  direct_runoff: false

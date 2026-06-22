@@ -1,0 +1,132 @@
+modules:
+  snowpack: true
+  frozen_ground: true
+  rain_on_snow: true
+  direct_runoff: false
+  dtr_fgi_decay: true
+  et_water_stress: false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples: 200
+  ego_seed: 42
+  ps_max_evaluations: 500
+  ps_convergence_tolerance: 1.0e-05
+  evaluation_concurrency: 8
+driver:
+  config_template: blue_earth_config_v3.yml
+  metric: KGE_logKGE
+  spin_up_cycles: 0
+  routing_N: 2
+  n_reservoirs: 1
+  reservoir_order:
+  - till
+  decade_start: '2001-01-01'
+  decade_end: '2010-12-31'
+  enforce_water_balance: none
+parameters:
+  log__recession_coeff_till:
+    description: log10 till+tile recession coefficient κ [days, b=2] — per-decade
+    lower: 1.0
+    upper: 4.5
+    initial: 1.9486
+    fixed: 1.9486
+    active: true
+  log__Hmax_till:
+    description: log10 till+tile max storage [mm] — storage ceiling above tile depth;
+      per-decade
+    lower: 1.0
+    upper: 4.0
+    initial: 2.5817
+    fixed: 2.5817
+    active: true
+  et_scale:
+    description: Thornthwaite ET multiplier (land cover / decade)
+    lower: 0.3
+    upper: 2.0
+    initial: 1.0
+    fixed: 1.0
+    active: true
+  PDD_melt_factor:
+    description: degree-day snowmelt rate — backbone_v3.1 fixed
+    lower: 0.1
+    upper: 10.0
+    initial: 4.36528255
+    fixed: 4.36528255
+    active: false
+  log__fdd_threshold:
+    description: log10 FGI threshold [degC·day] — backbone_v3.1 fixed
+    lower: 0.0
+    upper: 3.0
+    initial: 1.902817999
+    fixed: 1.902817999
+    active: false
+  recession_b_till:
+    description: till+tile recession exponent — fixed at 2 (Dupuit-Forchheimer)
+    lower: 1.0
+    upper: 3.0
+    initial: 2.0
+    fixed: 2.0
+    active: false
+  snow_insulation_k:
+    description: snow insulation — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  f_direct_runoff:
+    description: fast-bypass fraction — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  baseflow_Q:
+    description: regional GW import — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  log__routing_K:
+    description: Nash-cascade K — inactive
+    lower: -1.0
+    upper: 1.0
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  et_alpha:
+    description: ET partition fraction — fixed
+    lower: 0.01
+    upper: 0.99
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  log__H0_till:
+    description: log10 initial till+tile H [mm] — set by IC chain
+    lower: 0.0
+    upper: 5.0
+    initial: 1.455224
+    fixed: 1.455224
+    active: false
+  H0_snowpack:
+    description: initial snowpack SWE [mm] — set by IC chain
+    lower: 0.0
+    upper: 500.0
+    initial: 59.2202
+    fixed: 59.2202
+    active: false
+  H0_fgi:
+    description: initial frozen ground index [degC·day] — set by IC chain
+    lower: 0.0
+    upper: 500.0
+    initial: 561.0641
+    fixed: 561.0641
+    active: false
+  H0_deficit_carry:
+    description: initial ET deficit carry [mm] — 0 for first decade
+    lower: -1000000.0
+    upper: 1000000.0
+    initial: 0.0
+    fixed: 0.0
+    active: false

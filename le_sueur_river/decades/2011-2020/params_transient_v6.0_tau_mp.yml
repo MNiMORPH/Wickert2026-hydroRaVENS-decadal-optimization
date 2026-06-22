@@ -1,0 +1,138 @@
+modules:
+  snowpack: true
+  frozen_ground: false
+  rain_on_snow: true
+  direct_runoff: false
+  dtr_fgi_decay: false
+  et_water_stress: false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples: 80
+  ego_seed: 42
+  ps_max_evaluations: 250
+  ps_convergence_tolerance: 1.0e-05
+  evaluation_concurrency: 8
+driver:
+  config_template: le_sueur_config_v6.yml
+  metric: KGE_logKGE
+  spin_up_cycles: 0
+  routing_N: 2
+  n_reservoirs: 1
+  reservoir_order:
+  - till
+  decade_start: '2011-01-01'
+  decade_end: '2020-12-31'
+  enforce_water_balance: none
+parameters:
+  log__multipath_timescale_till:
+    description: log10 multipath τ — only per-decade active (tile-rate test)
+    lower: 0.0
+    upper: 2.0
+    initial: 1.1596
+    fixed: 1.1596
+    active: true
+  PDD_melt_factor:
+    description: PDD — LSR v6 fixed
+    lower: 0.1
+    upper: 10.0
+    initial: 6.6797
+    fixed: 6.6797
+    active: false
+  log__recession_coeff_till:
+    description: log10 matrix τ — LSR v6 fixed (global)
+    lower: 0.5
+    upper: 4.0
+    initial: 2.6572
+    fixed: 2.6572
+    active: false
+  log__multipath_threshold_till:
+    description: log10 multipath H_thr — LSR v6 fixed (global)
+    lower: 0.5
+    upper: 3.0
+    initial: 2.0282
+    fixed: 2.0282
+    active: false
+  log__fdd_threshold:
+    description: FGI threshold — inactive
+    lower: 0.0
+    upper: 4.0
+    initial: 4.0
+    fixed: 4.0
+    active: false
+  recession_b_till:
+    description: b — linear (1.0)
+    lower: 1.0
+    upper: 4.5
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  et_scale:
+    description: ET scale — BLR D3 mean
+    lower: 0.3
+    upper: 2.0
+    initial: 0.755
+    fixed: 0.755
+    active: false
+  snow_insulation_k:
+    description: inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  f_direct_runoff:
+    description: inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  baseflow_Q:
+    description: inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  log__routing_K:
+    description: inactive
+    lower: -1.0
+    upper: 1.0
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  et_alpha:
+    description: fixed
+    lower: 0.01
+    upper: 0.99
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  log__H0_till:
+    description: log10 initial H — IC chain
+    lower: 0.0
+    upper: 5.0
+    initial: 1.612643
+    fixed: 1.612643
+    active: false
+  H0_snowpack:
+    description: IC chain
+    lower: 0.0
+    upper: 500.0
+    initial: 76.2715
+    fixed: 76.2715
+    active: false
+  H0_fgi:
+    description: inactive (FGI off)
+    lower: 0.0
+    upper: 500.0
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  H0_deficit_carry:
+    description: IC chain
+    lower: -1000000.0
+    upper: 1000000.0
+    initial: 0.0
+    fixed: 0.0
+    active: false

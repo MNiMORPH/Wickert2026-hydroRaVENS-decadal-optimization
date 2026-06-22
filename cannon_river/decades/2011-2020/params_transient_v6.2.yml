@@ -1,0 +1,205 @@
+modules:
+  snowpack: true
+  frozen_ground: true
+  rain_on_snow: true
+  direct_runoff: false
+  dtr_fgi_decay: true
+  et_water_stress: false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples: 200
+  ego_seed: 42
+  ps_max_evaluations: 500
+  ps_convergence_tolerance: 1.0e-05
+  evaluation_concurrency: 8
+driver:
+  config_template: cannon_config_1893_2024.yml
+  metric: KGE_logKGE
+  spin_up_cycles: 0
+  routing_N: 2
+  n_reservoirs: 3
+  reservoir_order:
+  - soil
+  - intermediate
+  - deep
+  decade_start: '2011-01-01'
+  decade_end: '2020-12-31'
+  enforce_water_balance: none
+parameters:
+  log__recession_coeff_soil:
+    description: log10 soil recession coefficient κ [days] — per-decade tile-drain
+      efficiency proxy
+    lower: 1.0
+    upper: 4.5
+    initial: 3.5
+    fixed: 3.5
+    active: true
+  f_exfiltration_soil:
+    description: fraction of soil drainage to stream — per-decade
+    lower: 0.01
+    upper: 0.99
+    initial: 0.53
+    fixed: 0.53
+    active: true
+  et_scale:
+    description: Thornthwaite ET multiplier (land cover / decade)
+    lower: 0.3
+    upper: 2.0
+    initial: 1.0
+    fixed: 1.0
+    active: true
+  log__Hmax_soil:
+    description: log10 soil reservoir max storage [mm] — tile-drain ceiling; large=undrained,
+      small=heavily drained
+    lower: 1.0
+    upper: 3.0
+    initial: 2.7
+    fixed: 2.7
+    active: true
+  log__recession_coeff_intermediate:
+    description: log10 PdC recession coefficient κ — backbone_v6.2 fixed
+    lower: 1.0
+    upper: 5.0
+    initial: 4.382716049
+    fixed: 4.382716049
+    active: false
+  log__recession_coeff_deep:
+    description: log10 Wonewoc recession coefficient κ — backbone_v6.2 fixed
+    lower: 3.0
+    upper: 5.5
+    initial: 3.019772377
+    fixed: 3.019772377
+    active: false
+  log__leakance_R_intermediate:
+    description: log10 St. Lawrence shale leakance resistance — backbone_v6.2 fixed
+    lower: 0.5
+    upper: 5.0
+    initial: 1.990740741
+    fixed: 1.990740741
+    active: false
+  f_exfiltration_deep:
+    description: Wonewoc fraction to stream — backbone_v6.2 fixed
+    lower: 0.01
+    upper: 0.99
+    initial: 0.5870417953
+    fixed: 0.5870417953
+    active: false
+  log__H_threshold_deep:
+    description: log10 Wonewoc spring sill [mm] — backbone_v6.2 fixed
+    lower: 0.0
+    upper: 3.5
+    initial: 1.173868313
+    fixed: 1.173868313
+    active: false
+  PDD_melt_factor:
+    description: degree-day snowmelt rate — backbone_v6.2 fixed
+    lower: 0.1
+    upper: 10.0
+    initial: 5.853483796
+    fixed: 5.853483796
+    active: false
+  log__fdd_threshold:
+    description: log10 FGI threshold [degC·day] — backbone_v6.2 fixed
+    lower: 0.0
+    upper: 3.0
+    initial: 2.960442387
+    fixed: 2.960442387
+    active: false
+  recession_b_soil:
+    description: soil recession exponent — fixed at 2 (Dupuit-Forchheimer)
+    lower: 1.5
+    upper: 6.0
+    initial: 2.0
+    fixed: 2.0
+    active: false
+  recession_b_intermediate:
+    description: PdC recession exponent — Brutsaert-Nieber fixed
+    lower: 1.0
+    upper: 6.0
+    initial: 2.203
+    fixed: 2.203
+    active: false
+  f_exfiltration_intermediate:
+    description: dead param under leakance junction
+    lower: 0.01
+    upper: 0.99
+    initial: 0.012
+    fixed: 0.012
+    active: false
+  snow_insulation_k:
+    description: snow insulation — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  f_direct_runoff:
+    description: fast-bypass fraction — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  baseflow_Q:
+    description: regional GW import — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  log__routing_K:
+    description: Nash-cascade K — inactive
+    lower: -1.0
+    upper: 1.0
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  et_alpha:
+    description: ET partition fraction — fixed
+    lower: 0.01
+    upper: 0.99
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  log__H0_soil:
+    description: log10 initial soil H [mm] — set by IC chain
+    lower: 0.0
+    upper: 4.0
+    initial: 1.47877
+    fixed: 1.47877
+    active: false
+  log__H0_intermediate:
+    description: log10 initial PdC H [mm] — set by IC chain
+    lower: 0.0
+    upper: 5.0
+    initial: 2.627323
+    fixed: 2.627323
+    active: false
+  log__H0_deep:
+    description: log10 initial Wonewoc H [mm] — set by IC chain
+    lower: 0.0
+    upper: 5.0
+    initial: 2.100651
+    fixed: 2.100651
+    active: false
+  H0_snowpack:
+    description: initial snowpack SWE [mm] — set by IC chain
+    lower: 0.0
+    upper: 500.0
+    initial: 93.6507
+    fixed: 93.6507
+    active: false
+  H0_fgi:
+    description: initial frozen ground index [degC·day] — set by IC chain
+    lower: 0.0
+    upper: 500.0
+    initial: 361.525
+    fixed: 361.525
+    active: false
+  H0_deficit_carry:
+    description: initial ET deficit carry [mm] — 0 for first decade
+    lower: -1000000.0
+    upper: 1000000.0
+    initial: 0.0
+    fixed: 0.0
+    active: false

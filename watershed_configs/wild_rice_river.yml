@@ -1,0 +1,37 @@
+# Wild Rice River at Twin Valley, MN (USGS 05062500)
+# Drainage area: ~934 sq mi / ~2,419 km²
+# Discharge record: 1909-07-01 to present
+#   - Pre-tile / pre-ditch reference: 1910s decade has 2829 Q-days (relaxed-usable)
+#   - Gap in 1920s
+#   - 1980s has only ~1498 Q-days (gauge outage)
+# Substrate: glacial Lake Agassiz lacustrine sediments (clay-rich, flat lake plain).
+#   Drainage dominated by agricultural ditches + tile in clay — distinct from
+#   the till-substrate basins (BLR, LSR) and the multi-layer Cannon system.
+# Forcing start: 1905 gives ~5 yr spin-up before first scored decade (1911-1920)
+
+name:  wild_rice_river
+gauge: "05062500"
+title: "Wild Rice River at Twin Valley"
+grass_location: WildRiceRiver
+grass_epsg: 32615
+
+forcing:
+  start:       '1905-01-01'
+  end:         '2024-12-31'
+  csv_name:    wild_rice_forcing.csv
+  config_name: wild_rice_config_1905_2024.yml
+
+decades:
+  first_year: 1911
+  last_year:  2021
+
+# Warm-start from Cannon River A02 best-fit; will be refined per-decade
+initial_params:
+  log__t_recession_soil:         4.493
+  log__t_recession_intermediate: 1.021
+  log__t_recession_deep:         3.771
+  f_exfiltration_soil:           0.6662
+  f_exfiltration_intermediate:   0.0120
+  PDD_melt_factor:               7.8611
+  recession_b_soil:              5.4907
+  log__fdd_threshold:            2.502
