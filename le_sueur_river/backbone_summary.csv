@@ -1,0 +1,3 @@
+run,metric,config_template,n_evaluations,best_eval_id,best_objective,best_score,PDD_melt_factor,log__multipath_threshold_till,log__multipath_timescale_till,log__recession_coeff_till
+2026-06-20_123950_backbone_lsr_v6_1951,KGE_logKGE,le_sueur_config_v6.yml,724,672,0.212092513,0.787907487,6.745459879,2.028091348,1.13422032,2.64167613
+2026-06-20_124508_backbone_lsr_v6_1941,KGE_logKGE,le_sueur_config_v6.yml,865,828,0.2208397658,0.7791602342,6.679710409,2.02822492,1.159620101,2.657217448

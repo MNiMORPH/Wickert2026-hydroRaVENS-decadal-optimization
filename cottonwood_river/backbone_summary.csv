@@ -1,0 +1,2 @@
+run,metric,config_template,n_evaluations,best_eval_id,best_objective,best_score,PDD_melt_factor,log__multipath_threshold_till,log__multipath_timescale_till,log__recession_coeff_till
+2026-06-20_165401_backbone_cottonwood_v6_1931,KGE_logKGE,cottonwood_config_v6.yml,846,831,0.3820384439,0.6179615561,6.043056204,2.032909104,1.098987776,2.607144158

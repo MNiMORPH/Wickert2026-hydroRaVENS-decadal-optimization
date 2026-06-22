@@ -1,0 +1,4 @@
+run,metric,config_template,n_evaluations,best_eval_id,best_objective,best_score,PDD_melt_factor,f_exfiltration_soil,log__multipath_threshold_soil,log__multipath_threshold_till,log__multipath_timescale_soil,log__multipath_timescale_till,log__recession_coeff_deep,log__recession_coeff_soil,log__recession_coeff_till
+2026-06-20_132951_backbone_wildrice_v6_joint,KGE_logKGE,wild_rice_config_v6.yml,956,940,0.5541646771,0.44583532290000005,5.532424643,,,1.965962068,,1.479802892,,,2.592094219
+2026-06-20_134215_backbone_wildrice_v7_2res,KGE_logKGE,wild_rice_config_v7_2res.yml,1469,1467,0.3700922199,0.6299077800999999,4.463821373,0.7144182956,1.841456619,,1.606001372,,2.206061385,2.551865248,
+2026-06-20_163333_backbone_wildrice_v7_pretile,KGE_logKGE,wild_rice_config_v7_2res.yml,1378,1360,0.383084964,0.616915036,6.031034915,0.2099896048,1.616732039,,1.386197649,,1.761689815,2.229576046,
