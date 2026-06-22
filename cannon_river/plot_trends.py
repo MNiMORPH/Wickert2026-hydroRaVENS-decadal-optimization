@@ -53,38 +53,68 @@ if 'KGE' in df.columns:
     reliable &= (df['KGE'].fillna(-9) >= args.min_kge)
 
 # ---------------------------------------------------------------------------
-# Derived columns: mean residence time MRT = τ^(1/b) at Q_ref = 1 mm/day
+# Derived columns: mean residence time at a reference discharge Q_ref.
 #
-# Exact form: MRT = τ^(1/b) / Q_ref^(1 - 1/b)
-# At Q_ref = 1 mm/day this simplifies to τ^(1/b), a parameter-only
+# Power-law recession  Q = (H/τ)·(H/H_ref)^(b−1) = H^b/τ_eff  has only the
+# effective constant  τ_eff = τ·H_ref^(b−1)  identifiable from data.  The
+# calibration anchored recession_H_ref per reservoir (soil=50, int=100,
+# deep=1000 mm), so the stored coefficient τ is in that gauge.  The physical
+# mean residence time is
+#     MRT = τ_eff^(1/b) / Q_ref^(1−1/b)
+#         = τ^(1/b) · H_ref^((b−1)/b) / Q_ref^(1−1/b).
+# At Q_ref = 1 mm/day this is τ^(1/b)·H_ref^((b−1)/b), a parameter-only
 # composite that collapses the τ/b degeneracy without external data.
-# For b = 1 (linear) MRT = τ exactly.
+# For b = 1 (linear) MRT = τ exactly (the H_ref factor is 1).
+# Matches mnished Reservoir.mean_residence_time(); see
+# HANDOFF_Href_MRT_correction.md.
 # ---------------------------------------------------------------------------
 
-def _mrt(tau_col, b_col, b_fixed=None):
+# Recession gauge anchored per reservoir during calibration (run_and_score
+# used recession_H_ref = [50, 100, 1000] mm); needed to convert the stored
+# coefficients back to physical residence times.
+H_REF_SOIL, H_REF_INTERMEDIATE, H_REF_DEEP = 50.0, 100.0, 1000.0
+
+
+def _recession_col(reservoir):
+    """Recession-coefficient column under either naming convention:
+    log__recession_coeff_* (current) or log__t_recession_* (pre-rename,
+    still present in older summaries)."""
+    for name in (f'param_log__recession_coeff_{reservoir}',
+                 f'param_log__t_recession_{reservoir}'):
+        if name in df.columns:
+            return name
+    return None
+
+
+def _mrt(tau_col, b_col, b_fixed=None, H_ref=1.0):
     tau = 10 ** df[tau_col].astype(float)
     b   = (df[b_col].astype(float) if b_col in df.columns
            else pd.Series(b_fixed, index=df.index))
-    return tau ** (1.0 / b)
+    # MRT at Q_ref = 1 mm/day:  τ_eff^(1/b) = τ^(1/b) · H_ref^((b−1)/b)
+    return tau ** (1.0 / b) * H_ref ** ((b - 1.0) / b)
 
-if 'param_log__recession_coeff_soil' in df.columns:
+
+_soil_col = _recession_col('soil')
+if _soil_col is not None:
     b_col = ('param_recession_b_soil'
              if 'param_recession_b_soil' in df.columns else None)
     b_fix = 1.0 if b_col is None else None
-    df['mrt_soil'] = _mrt('param_log__recession_coeff_soil', b_col or '', b_fixed=b_fix)
+    df['mrt_soil'] = _mrt(_soil_col, b_col or '', b_fixed=b_fix, H_ref=H_REF_SOIL)
 
-if 'param_log__recession_coeff_intermediate' in df.columns:
+_int_col = _recession_col('intermediate')
+if _int_col is not None:
     b_col = ('param_recession_b_intermediate'
              if 'param_recession_b_intermediate' in df.columns else None)
     b_fix = 2.203 if b_col is None else None   # Brutsaert-Nieber fixed value
-    df['mrt_intermediate'] = _mrt('param_log__recession_coeff_intermediate',
-                                  b_col or '', b_fixed=b_fix)
+    df['mrt_intermediate'] = _mrt(_int_col, b_col or '', b_fixed=b_fix,
+                                  H_ref=H_REF_INTERMEDIATE)
 
-if 'param_log__recession_coeff_deep' in df.columns:
+_deep_col = _recession_col('deep')
+if _deep_col is not None:
     b_col = ('param_recession_b_deep'
              if 'param_recession_b_deep' in df.columns else None)
     b_fix = 1.0 if b_col is None else None
-    df['mrt_deep'] = _mrt('param_log__recession_coeff_deep', b_col or '', b_fixed=b_fix)
+    df['mrt_deep'] = _mrt(_deep_col, b_col or '', b_fixed=b_fix, H_ref=H_REF_DEEP)
 
 # ---------------------------------------------------------------------------
 # Panel definitions
@@ -101,19 +131,19 @@ PANELS = [
      'MRT soil',
      None,
      'MRT soil [days]',
-     'τ_soil^(1/b_soil)  — soil-zone residence time'),
+     'MRT (gauge-corrected, H_ref=50 mm)  — soil-zone residence time'),
 
     ('mrt_intermediate',
      'MRT intermediate',
      None,
      'MRT intermediate [days]',
-     'τ_int^(1/b_int)  — tile-drain signal'),
+     'MRT (gauge-corrected, H_ref=100 mm)  — tile-drain signal'),
 
     ('mrt_deep',
      'MRT deep',
      None,
      'MRT deep [days]',
-     'τ_deep^(1/b_deep)  — deep groundwater'),
+     'MRT (linear reservoir, b=1)  — deep groundwater'),
 
     # --- recession exponents ---
     ('param_recession_b_soil',
