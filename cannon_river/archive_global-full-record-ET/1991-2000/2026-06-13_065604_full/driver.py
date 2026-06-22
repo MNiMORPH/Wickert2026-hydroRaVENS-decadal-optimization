@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generic Dakota driver for hydroRaVENS calibration.
+Generic Dakota driver for MNiShed calibration.
 Reads all reservoir structure and parameters from params.yml — no hard-coded names.
 
 Compatible with any reservoir_order (2-res, 3-res, ...) and any combination of
@@ -12,7 +12,7 @@ import yaml
 import pandas as pd
 import dakota.interfacing as di
 import numpy as np
-from hydroravens import HydrographSeparation, run_and_score
+from mnished import HydrographSeparation, run_and_score
 
 # Suppress the enforce_water_balance='none' warning that fires every evaluation.
 # Intentional: et_scale carries explicit responsibility for the water balance.

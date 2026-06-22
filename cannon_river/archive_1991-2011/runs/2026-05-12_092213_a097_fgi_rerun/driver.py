@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Dakota driver for decade-by-decade hydroRaVENS calibration.
+Dakota driver for decade-by-decade MNiShed calibration.
 
 Run settings and active parameters are read from params.yml.
 Returns (1 - score) so Dakota minimisation is equivalent to metric maximisation.
@@ -9,7 +9,7 @@ Returns (1 - score) so Dakota minimisation is equivalent to metric maximisation.
 import yaml
 import dakota.interfacing as di
 import numpy as np
-from hydroravens import run_and_score
+from mnished import run_and_score
 
 with open('params.yml') as f:
     _cfg = yaml.safe_load(f)

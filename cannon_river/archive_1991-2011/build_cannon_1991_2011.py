@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build Cannon1991-2011Input.csv for hydroRaVENS 20-year calibration.
+Build Cannon1991-2011Input.csv for MNiShed 20-year calibration.
 
 Sources
 -------
@@ -10,7 +10,7 @@ Discharge                  : Dropbox/Papers/Submitted/ChannelWidth/DataCompariso
 Photoperiod                : computed via Forsythe et al. (1995), lat=44.0 N
 
 Output columns match CannonTestInput.csv exactly.
-Missing discharge days are left as NaN (hydroRaVENS skips them for scoring).
+Missing discharge days are left as NaN (MNiShed skips them for scoring).
 """
 
 import numpy as np

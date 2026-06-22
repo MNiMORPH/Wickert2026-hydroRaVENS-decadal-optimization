@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Find the best-fit parameters from a completed Dakota calibration run,
-re-run hydroRaVENS with those parameters, and produce a diagnostic plot.
+re-run MNiShed with those parameters, and produce a diagnostic plot.
 
 Figure layout
 -------------
@@ -28,8 +28,8 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from hydroravens import HydrographSeparation, run_and_score
-from hydroravens.calibration import _nse, _kge, _log_kge, _kge_logfdc
+from mnished import HydrographSeparation, run_and_score
+from mnished.calibration import _nse, _kge, _log_kge, _kge_logfdc
 
 # Intentional: et_scale carries explicit responsibility for the water balance.
 warnings.filterwarnings('ignore', message=r"enforce_water_balance='none'",
@@ -409,7 +409,7 @@ def make_plot(result, params_row, save_path):
     ax_fdc.set_title('Flow duration curve', fontsize=10)
     ax_fdc.grid(True, which='both', alpha=0.3)
 
-    fig.suptitle('hydroRaVENS – East Fork Des Moines River (IA) best-fit calibration', fontsize=13)
+    fig.suptitle('MNiShed – East Fork Des Moines River (IA) best-fit calibration', fontsize=13)
     plt.savefig(save_path, dpi=150, bbox_inches='tight')
     print(f'Figure saved to {save_path}')
 

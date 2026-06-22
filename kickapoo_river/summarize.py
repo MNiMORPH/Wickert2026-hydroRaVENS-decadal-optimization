@@ -174,8 +174,8 @@ for decade_dir in decade_dirs:
     # --- re-run best to get full metrics ---
     # Import here so summarize.py works even without hydroravens on PATH.
     try:
-        from hydroravens import HydrographSeparation, run_and_score
-        from hydroravens.calibration import _nse, _kge, _log_kge
+        from mnished import HydrographSeparation, run_and_score
+        from mnished.calibration import _nse, _kge, _log_kge
 
         param_cfg = cfg['parameters']
         modules   = cfg.get('modules', {})

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Dakota driver for decade-by-decade hydroRaVENS calibration.
+Dakota driver for decade-by-decade MNiShed calibration.
 
 Returns (1 - score) so Dakota minimisation is equivalent to metric maximisation.
 Set DECADE_START / DECADE_END to the scoring window.  For chained decades,
@@ -9,7 +9,7 @@ pass initial_states from the previous decade and set SPIN_UP_CYCLES = 0.
 
 import dakota.interfacing as di
 import numpy as np
-from hydroravens import run_and_score
+from mnished import run_and_score
 
 DECADE_START   = None   # None = full record; set e.g. '1990-01-01' for a decade
 DECADE_END     = None

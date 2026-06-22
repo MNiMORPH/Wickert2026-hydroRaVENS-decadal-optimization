@@ -2,7 +2,7 @@
 """
 Status tracker for all watershed calibration directories.
 
-Usage (from Wickert2026-hydroRaVENS-decadal-optimization/):
+Usage (from Wickert2026-MNiShed-decadal-optimization/):
     python status.py
     python status.py --verbose
 """
