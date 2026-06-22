@@ -1,6 +1,8 @@
 # ── Study outputs (large, machine-generated) ──────────────────────────────────
 # Per-decade Dakota archives (can be large; canonical outputs are summary.csv)
 */decades/*/runs/
+# Per-watershed backbone Dakota archives (canonical results in backbone_summary.csv)
+*/backbone_runs/
 # Per-watershed results and logs
 */summary.csv
 */trends.png
