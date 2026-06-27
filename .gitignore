@@ -251,3 +251,9 @@ dakota.rst
 dakota_results.h5
 LHS_*.out
 fort.13
+
+# Transient experiment run outputs (reproducible Dakota archives; the canonical
+# params/configs are kept, the per-run scratch is not)
+/root_river/transient_run*/
+# Best-fit figures rescued from pruned run archives (preserved on disk, not git)
+/saved_figures/
