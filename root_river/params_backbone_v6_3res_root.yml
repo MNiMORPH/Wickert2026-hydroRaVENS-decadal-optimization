@@ -1,0 +1,190 @@
+# Root River near Houston, MN (USGS 05385000) — v6 backbone, 3-RESERVOIR Cannon-style.
+#
+# Architecture choice (per Andy's correction after the 1-res v6 run landed at
+# KGE=0.48): same 3-reservoir layered structure as Cannon (soil / intermediate /
+# deep), but the upper layer is loess + topsoil rather than Cannon's
+# tile-drained glacial drift. ET multiplier is calibrated as a single
+# constant-in-time scalar (et_scale free, not WB-closed) because Root's basin
+# may export groundwater via karst — WB closure would absorb that loss into
+# et_scale per-decade.
+#
+# Geological mapping of layers (Driftless Area, no glacial drift):
+#   soil:         loess mantle + topsoil + weathered bedrock           (~30 d, b=1 linear)
+#   intermediate: Galena-Decorah carbonate + epikarst                  (~300 d, b=2.2 Brutsaert-Nieber)
+#   deep:         St. Peter sandstone + Prairie du Chien deep porous   (~10000 d, b=1)
+#
+# Why et_scale active and constant: Crow Wing showed BLR's 0.755 doesn't
+# transfer across the climate gradient (47°N too cold). Root at 43.7°N is
+# south of BLR (44°N) — value likely ≥0.755, possibly suppressed by karst
+# export (1-res landed at 0.656).
+#
+# Active param count: 9 (2 snow + 6 geologic + 1 ET).
+modules:
+  snowpack:          true
+  frozen_ground:     false
+  rain_on_snow:      true
+  direct_runoff:     false
+  dtr_fgi_decay:     false
+  et_water_stress:   false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples:      200
+  ego_seed:                 42
+  ps_max_evaluations:       1500
+  ps_convergence_tolerance: 1.0e-5
+  evaluation_concurrency:   8
+driver:
+  config_template:       root_river_config_v6_3res.yml
+  metric:                KGE_logKGE
+  spin_up_cycles:        1
+  routing_N:             2
+  n_reservoirs:          3
+  reservoir_order:       [soil, intermediate, deep]
+  enforce_water_balance: none
+  min_obs:               2000
+  decades:
+    - {start: '1911-01-01', end: '1920-12-31'}
+    - {start: '1921-01-01', end: '1930-12-31'}
+    - {start: '1931-01-01', end: '1940-12-31'}
+    - {start: '1941-01-01', end: '1950-12-31'}
+    - {start: '1951-01-01', end: '1960-12-31'}
+    - {start: '1961-01-01', end: '1970-12-31'}
+    - {start: '1971-01-01', end: '1980-12-31'}
+    - {start: '1981-01-01', end: '1990-12-31'}
+    - {start: '1991-01-01', end: '2000-12-31'}
+    - {start: '2001-01-01', end: '2010-12-31'}
+    - {start: '2011-01-01', end: '2020-12-31'}
+parameters:
+  PDD_melt_factor:
+    description: degree-day snowmelt rate [mm SWE / degC / day]
+    lower: 0.1
+    upper: 15.0
+    initial: 6.0
+    fixed: 6.0
+    active: true
+  log__recession_coeff_soil:
+    description: log10 τ_soil [days] — loess+topsoil drainage
+    lower: 0.5
+    upper: 3.5
+    initial: 1.5
+    fixed: 1.5
+    active: true
+  log__recession_coeff_intermediate:
+    description: log10 τ_intermediate [days] — Galena-Decorah carbonate
+    lower: 1.0
+    upper: 5.0
+    initial: 2.5
+    fixed: 2.5
+    active: true
+  log__recession_coeff_deep:
+    description: log10 τ_deep [days] — St. Peter sandstone
+    lower: 3.0
+    upper: 5.5
+    initial: 4.0
+    fixed: 4.0
+    active: true
+  f_exfiltration_soil:
+    description: fraction of soil discharge going direct to stream (vs recharge to intermediate)
+    lower: 0.01
+    upper: 0.99
+    initial: 0.5
+    fixed: 0.5
+    active: true
+  log__leakance_R_intermediate:
+    description: log10 leakance R from intermediate → deep [d^-1]; small=tight
+    lower: 0.5
+    upper: 5.0
+    initial: 2.0
+    fixed: 2.0
+    active: true
+  f_exfiltration_deep:
+    description: fraction of deep discharge to stream — captures karst loss if <1
+    lower: 0.01
+    upper: 0.99
+    initial: 0.5
+    fixed: 0.5
+    active: true
+  log__H_threshold_deep:
+    description: log10 dead-storage threshold H_thr for deep [mm]
+    lower: 0.0
+    upper: 3.5
+    initial: 1.5
+    fixed: 1.5
+    active: true
+  et_scale:
+    description: Thornthwaite ET scaling — FREE, constant across decades
+    lower: 0.3
+    upper: 3.0
+    initial: 0.755
+    fixed: 0.755
+    active: true
+  recession_b_soil:
+    description: b_soil — linear (loess+topsoil, not Dupuit tile)
+    lower: 1.0
+    upper: 4.5
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  recession_b_intermediate:
+    description: b_intermediate — Brutsaert-Nieber carbonate
+    lower: 1.0
+    upper: 4.5
+    initial: 2.203
+    fixed: 2.203
+    active: false
+  recession_b_deep:
+    description: b_deep — linear sandstone
+    lower: 1.0
+    upper: 4.5
+    initial: 1.0
+    fixed: 1.0
+    active: false
+  f_exfiltration_intermediate:
+    description: small fraction direct to stream; bulk goes via leakance
+    lower: 0.01
+    upper: 0.99
+    initial: 0.1
+    fixed: 0.1
+    active: false
+  log__fdd_threshold:
+    description: log10 FGI threshold — inactive (no frozen ground in driftless)
+    lower: 0.0
+    upper: 4.0
+    initial: 4.0
+    fixed: 4.0
+    active: false
+  snow_insulation_k:
+    description: snow insulation — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  f_direct_runoff:
+    description: fast-bypass fraction — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  baseflow_Q:
+    description: regional groundwater import — inactive
+    lower: 0.0
+    upper: 0.5
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  log__routing_K:
+    description: Nash-cascade K — inactive
+    lower: -1.0
+    upper: 1.0
+    initial: 0.0
+    fixed: 0.0
+    active: false
+  et_alpha:
+    description: ET partition fraction — fixed
+    lower: 0.01
+    upper: 0.99
+    initial: 1.0
+    fixed: 1.0
+    active: false
