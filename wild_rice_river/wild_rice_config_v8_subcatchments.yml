@@ -1,0 +1,67 @@
+# Wild Rice River v8: parallel sub-catchments (till uplands + clay lowlands).
+#
+# Replaces v7-2res's serial soil→deep cascade with a parallel two-zone
+# representation matching the basin's spatial substrate transition:
+#   - till_uplands (upper basin, Des Moines lobe till + outwash + alluvial
+#     corridor): drained by engineered tile (constant-fraction f_tile path
+#     on the soil reservoir).
+#   - clay_lowlands (lower basin, Lake Agassiz lake clay): drained by
+#     engineered ditches (threshold-activated multipath on the soil reservoir).
+#
+# Each zone runs its own 2-reservoir vertical cascade (soil + deep) in parallel;
+# basin Q = a_till*Q_till + a_clay*Q_clay. Snow + ET stay basin-level.
+#
+# Area fractions are PLACEHOLDERS (0.55/0.45) — to be refined from the
+# Quaternary geological map of MN (till vs lacustrine cover).
+#
+# Reservoir params are PLACEHOLDERS for the prototype forward-run, then
+# calibrated in v8.0 Dakota.
+
+timeseries:
+  datafile: /home/awickert/dataanalysis/Wickert2026-hydroRaVENS-decadal-optimization/forcing/wild_rice_river/wild_rice_forcing.csv
+
+catchment:
+  drainage_basin_area__km2: 2419.0
+  evapotranspiration_method: ThornthwaiteChang2019
+  water_year_start_month: 10
+  baseflow_Q: 0.0
+
+general:
+  spin_up_cycles: 1
+
+snowmelt:
+  PDD_melt_factor: 5.5
+  fgi_decay_coeff: 0.97
+  snow_insulation_k: 0.0
+
+modules:
+  snowpack: true
+  frozen_ground: false   # v7.1 confirmed FGI redundant in BLR; carry over for now
+  rain_on_snow: true
+  direct_runoff: false
+
+sub_catchments:
+  - name: till_uplands
+    area_fraction: 0.55         # PLACEHOLDER — refine from surficial geology map
+    reservoirs:
+      recession_coefficients:   [40, 800]    # till soil (fast), deep till (slow)
+      exfiltration_fractions:       [0.4, 1.0]
+      maximum_effective_depths__mm: [1000000.0, .inf]
+      tile_fractions:               [0.4, 0.0]   # engineered tile on till soil
+      tile_residence_times__days:   [7.0, null]  # ~1 week agricultural tile
+      recession_exponents:          [1.0, 1.0]   # both linear
+    initial_conditions:
+      water_reservoir_effective_depths__mm: [50.0, 400.0]
+      snowpack__mm_SWE: 0
+  - name: clay_lowlands
+    area_fraction: 0.45         # PLACEHOLDER — refine from surficial geology map
+    reservoirs:
+      recession_coefficients:   [100, 2000]  # clay soil, very slow deep clay
+      exfiltration_fractions:       [0.5, 1.0]
+      maximum_effective_depths__mm: [1000000.0, .inf]
+      multipath_thresholds__mm:     [50.0, null] # ditch (threshold-activated)
+      multipath_timescales__days:   [5.0, null]
+      recession_exponents:          [1.0, 1.0]
+    initial_conditions:
+      water_reservoir_effective_depths__mm: [50.0, 500.0]
+      snowpack__mm_SWE: 0
