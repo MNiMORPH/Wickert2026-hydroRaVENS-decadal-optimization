@@ -1,0 +1,42 @@
+# Crow Wing River at Nimrod, MN (USGS 05244000)
+# Drainage area: ~1,030 sq mi / ~2,668 km²
+# Discharge record: 1910-05-01 to present
+#   - 1910s: 1038 Q-days (too sparse)
+#   - 1920s gap
+#   - 1930s: 2078 days (relaxed-usable)
+#   - 1940s–1970s: continuous full coverage
+#   - 1980s: 665 days (gauge outage)
+#   - 1990s: 3014 days (relaxed-usable)
+#   - 2000s–2010s: continuous full coverage
+# Substrate: glacial till + outwash (Wadena lobe, Itasca-area moraines)
+# Lakes: substantial — includes the "11 Crow Wing Lakes" chain in Hubbard County
+#        plus Park Rapids lakes. Largely unregulated above Nimrod
+#        (major dams Pillager, Motley, Gull River are all DOWNSTREAM of gauge).
+# Forcing start: 1905 gives ~5 yr spin-up before first scored decade
+
+name:  crow_wing_river
+gauge: "05244000"
+title: "Crow Wing River at Nimrod"
+grass_location: CrowWingRiver
+grass_epsg: 32615
+
+forcing:
+  start:       '1905-01-01'
+  end:         '2024-12-31'
+  csv_name:    crow_wing_forcing.csv
+  config_name: crow_wing_config_1905_2024.yml
+
+decades:
+  first_year: 1911
+  last_year:  2021
+
+# Warm-start values; will be refined per-decade
+initial_params:
+  log__t_recession_soil:         4.493
+  log__t_recession_intermediate: 1.021
+  log__t_recession_deep:         3.771
+  f_exfiltration_soil:           0.6662
+  f_exfiltration_intermediate:   0.0120
+  PDD_melt_factor:               7.8611
+  recession_b_soil:              5.4907
+  log__fdd_threshold:            2.502
