@@ -1,0 +1,60 @@
+# Crow Wing v6 lake support — NO MULTIPATH variant (v2).
+#   - land sub-catchment (70%): plain matrix recession (multipath disabled)
+#   - lake sub-catchment (30%): direct P-E + threshold power-law outlet,
+#     bidirectional Q_gw exchange with the land deepest reservoir.
+#   - f_route_lake=0 (v1 incompleteness; clean test of Q_gw alone).
+#   - b=5/3 (Manning friction-controlled outlet).
+#
+# Rationale: in the v1 lake test (2001-2010), τ_matrix relaxed 956→321 d and
+# τ_mp came off its upper bound (98→84 d) — but with the lake reservoir now
+# doing the buffer-and-release work that multipath was approximating, the
+# till cascade no longer needs a separate fast-drainage pathway. Multipath
+# disabled here by setting the activation threshold beyond any reachable head.
+
+timeseries:
+  datafile: /home/awickert/dataanalysis/Wickert2026-hydroRaVENS-decadal-optimization/forcing/crow_wing_river/crow_wing_forcing.csv
+
+catchment:
+  drainage_basin_area__km2: 2334.8
+  evapotranspiration_method: ThornthwaiteChang2019
+  water_year_start_month: 10
+  baseflow_Q: 0.0
+
+general:
+  spin_up_cycles: 1
+
+sub_catchments:
+  - name: land
+    area_fraction: 0.70
+    reservoirs:
+      recession_coefficients:   [100]
+      exfiltration_fractions:   [1.0]
+      maximum_effective_depths__mm: [1000000.0]
+      multipath_thresholds__mm: [10000000000.0]  # multipath disabled (threshold above any reachable head)
+      multipath_timescales__days: [1.0]          # irrelevant when threshold never reached
+      recession_exponents:      [1.0]
+    initial_conditions:
+      water_reservoir_effective_depths__mm: [50.0]
+
+  - name: lake
+    kind: lake
+    area_fraction: 0.30
+    lake:
+      outflow_coefficient: 0.005              # a (slow outlet; calibrated as 1/recession_coeff)
+      sill_storage__mm:    600.0              # H_sill (calibrated as H_threshold)
+      outflow_exponent:    1.6667             # b = 5/3 (fixed)
+      gw_partner:          land
+      f_route_lake:        0.0
+    initial_conditions:
+      lake_storage__mm:    1000.0             # above sill, larger than v1 to reflect deeper sill
+
+snowmelt:
+  PDD_melt_factor: 7.83
+  fgi_decay_coeff: 0.97
+  snow_insulation_k: 0.0
+
+modules:
+  snowpack: true
+  frozen_ground: false
+  rain_on_snow: true
+  direct_runoff: false

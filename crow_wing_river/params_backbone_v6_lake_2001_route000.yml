@@ -1,0 +1,62 @@
+# Crow Wing v6 LAKE — NO MULTIPATH variant, single-decade test (2001-2010).
+# 5 active params: PDD, et_scale, log τ_matrix (land), log recession_coeff_lake, log H_sill_lake.
+# Lake bounds widened per v1 result (recession_coeff_lake hit upper, H_sill near upper).
+modules:
+  snowpack:          true
+  frozen_ground:     false
+  rain_on_snow:      true
+  direct_runoff:     false
+  dtr_fgi_decay:     false
+  et_water_stress:   false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples:      200
+  ego_seed:                 42
+  ps_max_evaluations:       1500
+  ps_convergence_tolerance: 1.0e-5
+  evaluation_concurrency:   8
+driver:
+  config_template:       crow_wing_config_v6_lake_route000.yml
+  metric:                KGE_logKGE
+  spin_up_cycles:        1
+  routing_N:             2
+  enforce_water_balance: none
+  min_obs:               2000
+  decades:
+    - {start: '2001-01-01', end: '2010-12-31'}
+parameters:
+  PDD_melt_factor:
+    description: degree-day snowmelt rate [mm SWE / degC / day]
+    lower: 0.1
+    upper: 15.0
+    initial: 7.83
+    fixed: 7.83
+    active: true
+  et_scale:
+    description: Thornthwaite ET multiplier
+    lower: 0.3
+    upper: 2.0
+    initial: 0.56
+    fixed: 0.56
+    active: true
+  log__recession_coeff_till:
+    description: log10 matrix τ [days] — LAND sub-catchment (widened lower since no multipath fast path)
+    lower: 0.0
+    upper: 4.0
+    initial: 2.51
+    fixed: 2.51
+    active: true
+  log__recession_coeff_lake:
+    description: log10 (1/a) for lake outflow Q=a(H-H_sill)^(5/3); a ∈ [10⁻⁶, 0.5]
+    lower: 0.3
+    upper: 6.0
+    initial: 2.30
+    fixed: 2.30
+    active: true
+  log__H_sill_lake:
+    description: log10 lake sill threshold [mm conceptual storage]
+    lower: 0.0
+    upper: 4.0
+    initial: 2.92
+    fixed: 2.92
+    active: true

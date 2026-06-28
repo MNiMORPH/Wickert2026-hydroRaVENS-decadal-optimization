@@ -1,0 +1,89 @@
+# Crow Wing v6 lake support — TWO-LAND-ZONE variant (v5 / "2zone").
+#
+# Structural form of f_route_lake: instead of one homogeneous land cascade with
+# a calibrated fraction routed through the lake, the land is split into two
+# sub-catchments that drain by different paths and carry their OWN matrix τ:
+#
+#   - direct_land      (30% area): drains straight to the gauge. Fast τ →
+#                       right-timed storm peaks (the regime v3's single τ=129 d
+#                       was too slow to capture: top-20 peaks under-predicted ~50%).
+#   - lake_basin_land  (40% area): drains entirely THROUGH the lake chain. Slow τ
+#                       → the buffered, delayed water the lake then further smooths.
+#   - lake             (30% area): open water (NHD-derived). Direct P-E + threshold
+#                       power-law outlet + bidirectional Q_gw with lake_basin_land.
+#                       f_route_lake = 1.0 (all of lake_basin_land's discharge
+#                       transits the lake — routing is now STRUCTURAL, not a fraction).
+#
+# Why: Crow Wing v3 (single land + f_route) got timing right but storm peaks
+# too smooth (α=0.86); v4 (+direct_runoff) got the distribution right but lost
+# timing (r 0.64→0.58, peaks on wrong days). One land τ must compromise between
+# the lake-fed headwaters and the directly-draining main stem. Two land zones
+# give two independently-resolvable timescales → fast peaks AND slow recession.
+#
+# Area split (0.30 / 0.40 / 0.30) is FIXED here (lake from NHD open water), to be
+# refined later from DEM contributing-area analysis (GRASS-fluvial-profiler prior
+# factory). Same active-param count as v3 (6): the single τ_matrix + f_route_lake
+# of v3 are replaced by τ_direct + τ_routed.
+#
+# b=5/3 (Manning friction-controlled lake outlet). Multipath disabled on both
+# land zones (the lake reservoir does the buffer-and-release work).
+
+timeseries:
+  datafile: /home/awickert/dataanalysis/Wickert2026-hydroRaVENS-decadal-optimization/forcing/crow_wing_river/crow_wing_forcing.csv
+
+catchment:
+  drainage_basin_area__km2: 2334.8
+  evapotranspiration_method: ThornthwaiteChang2019
+  water_year_start_month: 10
+  baseflow_Q: 0.0
+
+general:
+  spin_up_cycles: 1
+
+sub_catchments:
+  - name: direct_land
+    area_fraction: 0.30
+    reservoirs:
+      recession_coefficients:   [20]                # fast τ; overridden by driver (log__recession_coeff_direct)
+      exfiltration_fractions:   [1.0]
+      maximum_effective_depths__mm: [1000000.0]
+      multipath_thresholds__mm: [10000000000.0]     # multipath disabled
+      multipath_timescales__days: [1.0]
+      recession_exponents:      [1.0]
+    initial_conditions:
+      water_reservoir_effective_depths__mm: [50.0]
+
+  - name: lake_basin_land
+    area_fraction: 0.40
+    reservoirs:
+      recession_coefficients:   [300]               # slow τ; overridden by driver (log__recession_coeff_routed)
+      exfiltration_fractions:   [1.0]
+      maximum_effective_depths__mm: [1000000.0]
+      multipath_thresholds__mm: [10000000000.0]     # multipath disabled
+      multipath_timescales__days: [1.0]
+      recession_exponents:      [1.0]
+    initial_conditions:
+      water_reservoir_effective_depths__mm: [50.0]
+
+  - name: lake
+    kind: lake
+    area_fraction: 0.30
+    lake:
+      outflow_coefficient: 0.005              # a (slow outlet; calibrated as 1/recession_coeff)
+      sill_storage__mm:    600.0              # H_sill (calibrated as H_threshold)
+      outflow_exponent:    1.6667             # b = 5/3 (fixed)
+      gw_partner:          lake_basin_land    # Q_gw exchange with the lake-feeding land zone
+      f_route_lake:        1.0                # ALL of lake_basin_land's discharge transits the lake (structural)
+    initial_conditions:
+      lake_storage__mm:    1000.0
+
+snowmelt:
+  PDD_melt_factor: 7.83
+  fgi_decay_coeff: 0.97
+  snow_insulation_k: 0.0
+
+modules:
+  snowpack: true
+  frozen_ground: false
+  rain_on_snow: true
+  direct_runoff: false

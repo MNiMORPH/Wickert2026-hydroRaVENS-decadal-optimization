@@ -1,0 +1,107 @@
+modules:
+  snowpack: true
+  frozen_ground: true
+  rain_on_snow: true
+  direct_runoff: false
+  dtr_fgi_decay: false
+  et_water_stress: false
+  et_reservoir_draw: true
+driver:
+  config_template: crow_wing_config_v6_2layer_frozen_phen.yml
+  metric: KGE_logKGE
+  spin_up_cycles: 1
+  routing_N: 2
+  enforce_water_balance: none
+  decade_start: null
+  decade_end: null
+  decades:
+  - start: '1931-01-01'
+    end: '1940-12-31'
+  - start: '1941-01-01'
+    end: '1950-12-31'
+  - start: '1951-01-01'
+    end: '1960-12-31'
+  - start: '1961-01-01'
+    end: '1970-12-31'
+  - start: '1971-01-01'
+    end: '1980-12-31'
+  - start: '1991-01-01'
+    end: '2000-12-31'
+  - start: '2001-01-01'
+    end: '2010-12-31'
+  - start: '2011-01-01'
+    end: '2020-12-31'
+parameters:
+  PDD_melt_factor:
+    description: degree-day snowmelt rate [mm SWE / degC / day]
+    lower: 0.1
+    upper: 15.0
+    initial: 3.337
+    fixed: 3.337
+    active: true
+    target: melt_factor
+  et_scale:
+    description: Thornthwaite ET multiplier
+    lower: 0.3
+    upper: 2.0
+    initial: 1.0
+    fixed: 1.0
+    active: true
+    target: et_scale
+  log__recession_coeff_soil:
+    description: "log10 soil \u03C4 [days] \u2014 shallow layer, both land zones (shared\
+      \ index 0,1)"
+    lower: 0.0
+    upper: 3.0
+    initial: 1.525
+    fixed: 1.525
+    active: true
+    target: sub_catchments[0,1].recession_coeff[0]
+  log__recession_coeff_gw:
+    description: "log10 groundwater \u03C4 [days] \u2014 deep layer, both land zones"
+    lower: 1.0
+    upper: 5.0
+    initial: 2.444
+    fixed: 2.444
+    active: true
+    target: sub_catchments[0,1].recession_coeff[1]
+  f_exfil_soil:
+    description: soil drainage fraction to stream (rest -> gw); both land zones
+    lower: 0.0
+    upper: 1.0
+    initial: 0.54
+    fixed: 0.54
+    active: true
+    target: sub_catchments[0,1].f_to_discharge[0]
+  log__recession_coeff_lake:
+    description: log10 (1/a) for lake outflow Q=a(H-H_sill)^(5/3)
+    lower: 0.3
+    upper: 7.0
+    initial: 4.479
+    fixed: 4.479
+    active: true
+    target: sub_catchments[2].recession_coeff[0]
+  log__H_sill_lake:
+    description: log10 lake sill threshold [mm]
+    lower: 0.0
+    upper: 4.0
+    initial: 2.29
+    fixed: 2.29
+    active: true
+    target: sub_catchments[2].H_threshold[0]
+  f_route_lake:
+    description: fraction of lake-district discharge routed THROUGH the lake
+    lower: 0.0
+    upper: 1.0
+    initial: 0.4
+    fixed: 0.4
+    active: true
+    target: sub_catchments[2].f_route_lake
+  log__fdd_threshold:
+    description: log10 FGI threshold [degC*day] (frozen -> all snowmelt to runoff)
+    lower: 0.0
+    upper: 3.0
+    initial: 2.259
+    fixed: 2.259
+    active: true
+    target: fdd_threshold

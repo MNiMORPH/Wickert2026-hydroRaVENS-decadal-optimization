@@ -1,0 +1,93 @@
+# Crow Wing v6 — TWO-LAYER LAND + FROZEN GROUND — MULTI-DECADE backbone.
+# Same 9 params as the single-decade frozen run; initials SEEDED from the
+# single-decade (2001-2010) best. Scored as mean KGE_logKGE over the 8 decades
+# with >=2000 obs (compare vs the 0.597 etscale no-lake baseline).
+#   usage: conda activate mnished-jit; python run_sceua.py 5000 params_multidecade.yml
+modules:
+  snowpack:          true
+  frozen_ground:     true
+  rain_on_snow:      true
+  direct_runoff:     false
+  dtr_fgi_decay:     false
+  et_water_stress:   false
+  et_reservoir_draw: true
+driver:
+  config_template:       crow_wing_config_v6_2layer_frozen.yml
+  metric:                KGE_logKGE
+  spin_up_cycles:        1
+  routing_N:             2
+  enforce_water_balance: none
+  min_obs:               2000
+  decades:
+    - {start: '1931-01-01', end: '1940-12-31'}
+    - {start: '1941-01-01', end: '1950-12-31'}
+    - {start: '1951-01-01', end: '1960-12-31'}
+    - {start: '1961-01-01', end: '1970-12-31'}
+    - {start: '1971-01-01', end: '1980-12-31'}
+    - {start: '1991-01-01', end: '2000-12-31'}
+    - {start: '2001-01-01', end: '2010-12-31'}
+    - {start: '2011-01-01', end: '2020-12-31'}
+parameters:
+  PDD_melt_factor:
+    description: degree-day snowmelt rate [mm SWE / degC / day]
+    lower: 0.1
+    upper: 15.0
+    initial: 1.22
+    fixed: 1.22
+    active: true
+  et_scale:
+    description: Thornthwaite ET multiplier
+    lower: 0.3
+    upper: 2.0
+    initial: 0.671
+    fixed: 0.671
+    active: true
+  log__recession_coeff_soil:
+    description: log10 soil τ [days] — shallow responsive layer (both land zones)
+    lower: 0.0
+    upper: 3.0
+    initial: 1.473
+    fixed: 1.473
+    active: true
+  log__recession_coeff_gw:
+    description: log10 groundwater τ [days] — deep baseflow layer (both land zones)
+    lower: 1.0
+    upper: 5.0
+    initial: 3.712
+    fixed: 3.712
+    active: true
+  f_exfil_soil:
+    description: fraction of soil drainage to stream (rest recharges gw); both zones
+    lower: 0.0
+    upper: 1.0
+    initial: 0.559
+    fixed: 0.559
+    active: true
+  log__recession_coeff_lake:
+    description: log10 (1/a) for lake outflow Q=a(H-H_sill)^(5/3)
+    lower: 0.3
+    upper: 7.0
+    initial: 4.461
+    fixed: 4.461
+    active: true
+  log__H_sill_lake:
+    description: log10 lake sill threshold [mm conceptual storage]
+    lower: 0.0
+    upper: 4.0
+    initial: 2.230
+    fixed: 2.230
+    active: true
+  f_route_lake:
+    description: fraction of lake-district discharge routed THROUGH the lake (free)
+    lower: 0.0
+    upper: 1.0
+    initial: 0.592
+    fixed: 0.592
+    active: true
+  log__fdd_threshold:
+    description: log10 FGI threshold [degC*day]; ground frozen (all snowmelt->runoff) when FGI exceeds it
+    lower: 0.0
+    upper: 3.0
+    initial: 2.098
+    fixed: 2.098
+    active: true

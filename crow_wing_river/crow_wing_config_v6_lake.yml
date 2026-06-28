@@ -1,0 +1,54 @@
+# Crow Wing v6 with lake support (v1):
+#   - land sub-catchment (70%): the v6 single-cascade verbatim
+#   - lake sub-catchment (30%): direct P-E + threshold power-law outlet,
+#     bidirectional Q_gw exchange with the land deepest reservoir.
+#   - f_route_lake=0 (deliberate v1 incompleteness; clean test of Q_gw alone).
+#   - b=5/3 (Manning friction-controlled outlet).
+
+timeseries:
+  datafile: /home/awickert/dataanalysis/Wickert2026-hydroRaVENS-decadal-optimization/forcing/crow_wing_river/crow_wing_forcing.csv
+
+catchment:
+  drainage_basin_area__km2: 2334.8
+  evapotranspiration_method: ThornthwaiteChang2019
+  water_year_start_month: 10
+  baseflow_Q: 0.0
+
+general:
+  spin_up_cycles: 1
+
+sub_catchments:
+  - name: land
+    area_fraction: 0.70                       # 1 - lake fraction
+    reservoirs:                               # v6 cascade unchanged
+      recession_coefficients:   [100]
+      exfiltration_fractions:   [1.0]
+      maximum_effective_depths__mm: [1000000.0]
+      multipath_thresholds__mm: [50.0]
+      multipath_timescales__days: [5.0]
+      recession_exponents:      [1.0]
+    initial_conditions:
+      water_reservoir_effective_depths__mm: [50.0]
+
+  - name: lake
+    kind: lake
+    area_fraction: 0.30                       # NHD / MN DNR estimate (pinned)
+    lake:
+      outflow_coefficient: 0.05               # a; Q_out = a*(H-H_sill)^b  (calibrated as 1/recession_coeff)
+      sill_storage__mm:    200.0              # H_sill (calibrated as H_threshold)
+      outflow_exponent:    1.6667             # b = 5/3 (fixed; Manning friction-controlled)
+      gw_partner:          land               # auto-resolves with one land zone
+      f_route_lake:        0.0                # v1: lake disconnected from channelized inflow
+    initial_conditions:
+      lake_storage__mm:    250.0              # above sill (outlet active from start)
+
+snowmelt:
+  PDD_melt_factor: 7.83                       # init from v6 etscale-free best
+  fgi_decay_coeff: 0.97
+  snow_insulation_k: 0.0
+
+modules:
+  snowpack: true
+  frozen_ground: false
+  rain_on_snow: true
+  direct_runoff: false

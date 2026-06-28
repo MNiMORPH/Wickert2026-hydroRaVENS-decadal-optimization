@@ -1,0 +1,79 @@
+# Crow Wing v6 LAKE — TWO-LAND-ZONE structure (2001-2010 single-decade diagnostic).
+#
+# 6 active params (same count as v3 f_route): PDD, et_scale,
+# log τ_direct (fast land → gauge), log τ_routed (slow land → lake),
+# log recession_coeff_lake, log H_sill_lake.
+#
+# The single τ_matrix + f_route_lake of v3 are replaced by TWO land timescales.
+# Area split is FIXED in the config (0.30 direct / 0.40 routed / 0.30 lake);
+# f_route_lake fixed at 1.0 there (routing is structural). Multipath disabled.
+#
+# Purpose: re-run the storm-peak diagnostic (r, α, FDC tails, top-20 peaks) that
+# exposed the v3/v4 wall, and check whether two independent land timescales fix
+# TIMING and DISTRIBUTION simultaneously (v3 got timing, v4 got distribution).
+modules:
+  snowpack:          true
+  frozen_ground:     false
+  rain_on_snow:      true
+  direct_runoff:     false
+  dtr_fgi_decay:     false
+  et_water_stress:   false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples:      250
+  ego_seed:                 42
+  ps_max_evaluations:       2000
+  ps_convergence_tolerance: 1.0e-5
+  evaluation_concurrency:   8
+driver:
+  config_template:       crow_wing_config_v6_lake_2zone.yml
+  metric:                KGE_logKGE
+  spin_up_cycles:        1
+  routing_N:             2
+  enforce_water_balance: none
+  min_obs:               2000
+  decades:
+    - {start: '2001-01-01', end: '2010-12-31'}
+parameters:
+  PDD_melt_factor:
+    description: degree-day snowmelt rate [mm SWE / degC / day]
+    lower: 0.1
+    upper: 15.0
+    initial: 9.32
+    fixed: 9.32
+    active: true
+  et_scale:
+    description: Thornthwaite ET multiplier
+    lower: 0.3
+    upper: 2.0
+    initial: 0.55
+    fixed: 0.55
+    active: true
+  log__recession_coeff_direct:
+    description: log10 matrix τ [days] — direct_land zone (fast, drains to gauge)
+    lower: 0.0
+    upper: 4.0
+    initial: 1.30
+    fixed: 1.30
+    active: true
+  log__recession_coeff_routed:
+    description: log10 matrix τ [days] — lake_basin_land zone (slow, drains through lake)
+    lower: 0.0
+    upper: 4.0
+    initial: 2.50
+    fixed: 2.50
+    active: true
+  log__recession_coeff_lake:
+    description: log10 (1/a) for lake outflow Q=a(H-H_sill)^(5/3); a ∈ [10⁻⁶, 0.5]
+    lower: 0.3
+    upper: 6.0
+    initial: 2.85
+    fixed: 2.85
+    active: true
+  log__H_sill_lake:
+    description: log10 lake sill threshold [mm conceptual storage]
+    lower: 0.0
+    upper: 4.0
+    initial: 2.44
+    fixed: 2.44
+    active: true

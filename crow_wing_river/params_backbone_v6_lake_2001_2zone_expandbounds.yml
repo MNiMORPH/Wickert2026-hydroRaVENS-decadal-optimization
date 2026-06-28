@@ -1,0 +1,89 @@
+# Crow Wing v6 LAKE — TWO-LAND-ZONE, BOTH slow timescales FREE, ceilings EXPANDED (2001-2010).
+#
+# The free-split run PEGGED τ_routed at its old upper bound (10,000 d) — the data
+# wanted maximal slow storage. (Fixing τ_routed FAST at 10 d broke the fit and
+# drove τ_lake unphysical — that was a mis-designed test.) Here we instead RAISE
+# the ceilings and leave BOTH τ_routed and τ_lake free, to answer:
+#   - does τ_routed want to run PAST 10,000 d (i.e. act as a near-infinite
+#     distributed-storage reservoir), or settle interior?
+#   - does τ_lake stay PHYSICAL (~25,400 ≈ 40 m outlet) while it does?
+#
+# τ_routed ceiling 4.0 -> 7.0 ; τ_lake ceiling 6.0 -> 7.0 (10^7 d ≈ 27,000 yr,
+# non-binding). Initials SEEDED from the free-split best (eval 1574); harmless
+# warm start (EGO explores the whole box; PS refines from EGO's best).
+# ego_initial_samples 300 -> 400 for the enlarged box.
+#
+# 7 active params: PDD, et_scale, τ_direct, τ_routed, τ_lake, H_sill, f_split.
+modules:
+  snowpack:          true
+  frozen_ground:     false
+  rain_on_snow:      true
+  direct_runoff:     false
+  dtr_fgi_decay:     false
+  et_water_stress:   false
+  et_reservoir_draw: true
+dakota:
+  ego_initial_samples:      400
+  ego_seed:                 42
+  ps_max_evaluations:       2500
+  ps_convergence_tolerance: 1.0e-5
+  evaluation_concurrency:   8
+driver:
+  config_template:       crow_wing_config_v6_lake_2zone.yml
+  metric:                KGE_logKGE
+  spin_up_cycles:        1
+  routing_N:             2
+  enforce_water_balance: none
+  min_obs:               2000
+  decades:
+    - {start: '2001-01-01', end: '2010-12-31'}
+parameters:
+  PDD_melt_factor:
+    description: degree-day snowmelt rate [mm SWE / degC / day]
+    lower: 0.1
+    upper: 15.0
+    initial: 1.156
+    fixed: 1.156
+    active: true
+  et_scale:
+    description: Thornthwaite ET multiplier
+    lower: 0.3
+    upper: 2.0
+    initial: 0.592
+    fixed: 0.592
+    active: true
+  log__recession_coeff_direct:
+    description: log10 matrix τ [days] — direct_land zone (drains to gauge)
+    lower: 0.0
+    upper: 4.0
+    initial: 1.5066
+    fixed: 1.5066
+    active: true
+  log__recession_coeff_routed:
+    description: log10 matrix τ [days] — lake_basin_land zone; ceiling raised 4.0 -> 7.0 (pegged at 4.0 in free-split)
+    lower: 0.0
+    upper: 7.0
+    initial: 4.0
+    fixed: 4.0
+    active: true
+  log__recession_coeff_lake:
+    description: log10 (1/a) for lake outflow Q=a(H-H_sill)^(5/3); ceiling raised 6.0 -> 7.0
+    lower: 0.3
+    upper: 7.0
+    initial: 4.4049
+    fixed: 4.4049
+    active: true
+  log__H_sill_lake:
+    description: log10 lake sill threshold [mm conceptual storage]
+    lower: 0.0
+    upper: 4.0
+    initial: 1.3306
+    fixed: 1.3306
+    active: true
+  f_split:
+    description: fraction of NON-LAKE land area assigned to direct_land (vs lake_basin_land); lake fixed at NHD 0.30
+    lower: 0.05
+    upper: 0.95
+    initial: 0.3958
+    fixed: 0.3958
+    active: true
