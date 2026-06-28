@@ -16,7 +16,7 @@ general:
   spin_up_cycles: 1
 
 reservoirs:
-  recession_timescales__days:
+  recession_coefficients:
     - 100       # matrix τ (placeholder; calibrated)
   exfiltration_fractions:
     - 1.0       # all to stream (single bottom reservoir)

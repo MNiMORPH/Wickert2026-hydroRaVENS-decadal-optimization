@@ -17,7 +17,7 @@ general:
   spin_up_cycles: 1
 
 reservoirs:
-  recession_timescales__days:
+  recession_coefficients:
     - 200      # soil zone (placeholder; calibrated per-decade)
     - 3000     # shallow till groundwater (placeholder; calibrated in backbone)
   exfiltration_fractions:

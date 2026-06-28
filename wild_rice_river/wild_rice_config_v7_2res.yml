@@ -18,7 +18,7 @@ general:
   spin_up_cycles: 1
 
 reservoirs:
-  recession_timescales__days:
+  recession_coefficients:
     - 100       # soil clay τ (placeholder; calibrated)
     - 1000      # deep clay τ (placeholder; calibrated; expect long for clay)
   exfiltration_fractions:

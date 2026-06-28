@@ -18,7 +18,7 @@ general:
   spin_up_cycles: 1
 
 reservoirs:
-  recession_timescales__days:
+  recession_coefficients:
     - 60        # soil matrix τ (placeholder; calibrated)
     - 16000     # intermediate (fixed at v6.3)
     - 1250      # deep (fixed at v6.3)

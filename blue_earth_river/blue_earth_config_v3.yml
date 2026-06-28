@@ -16,7 +16,7 @@ general:
   spin_up_cycles: 1
 
 reservoirs:
-  recession_timescales__days:
+  recession_coefficients:
     - 3000      # till+tile (placeholder; calibrated per-decade in transient)
   exfiltration_fractions:
     - 1.0       # all to stream (single bottom reservoir)

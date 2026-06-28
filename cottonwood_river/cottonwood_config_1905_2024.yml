@@ -18,7 +18,7 @@ general:
   spin_up_cycles: 1
 
 reservoirs:
-  recession_timescales__days:
+  recession_coefficients:
     - 16       # shallow (placeholder — calibrate)
     - 200      # soil zone (placeholder — calibrate)
     - 3650     # deep / karst (placeholder — calibrate)
