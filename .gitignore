@@ -257,3 +257,6 @@ fort.13
 /root_river/transient_run*/
 # Best-fit figures rescued from pruned run archives (preserved on disk, not git)
 /saved_figures/
+
+# Scratch config written by run_sceua.py each run
+tmp_*cfg*.yml
