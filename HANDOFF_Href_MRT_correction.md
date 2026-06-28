@@ -81,19 +81,23 @@ so it is correct for any H_ref. **With H_ref = 1, the calibrated τ *is* τ_eff.
 
 ## Also required if you re-run (option 1): config-key rename
 
-The updated MNiShed renamed the YAML key `recession_timescales__days` →
-`recession_timescales` (the `__days` suffix was dropped because the recession
-coefficient is not in days for `b > 1`). Before re-running any calibration
-against the updated library, rename this key in every `params.yml` / config in
-this project (the coefficient *values* do not change — only the key name):
+The updated MNiShed renamed the reservoir recession-coefficient YAML key to
+its final name **`recession_coefficients`**. (`__days` was dropped because the
+value is not in days for `b > 1`; "timescales" was dropped because it is a
+drainage coefficient, not a residence time, for nonlinear reservoirs.) Before
+re-running any calibration against the updated library, rename the key in every
+`params.yml` / config in this project — the coefficient *values* do not change,
+only the key name. Cover both current spellings:
 
 ```bash
-grep -rl 'recession_timescales__days' . \
-  | xargs sed -i 's/recession_timescales__days/recession_timescales/g'
+grep -rlE 'recession_timescales(__days)?' . \
+  | xargs sed -i -E 's/recession_timescales(__days)?/recession_coefficients/g'
 ```
 
-This is in addition to the broader hydroRaVENS → mnished v3 migration (package
-import, `BmiHydroRaVENS` → `BmiMNiShed`, etc.).
+(Cannon and Blue Earth, already migrated, use the interim `recession_timescales`;
+the others still use `recession_timescales__days`. The command above handles
+both.) This is in addition to the broader hydroRaVENS → mnished v3 migration
+(package import, `BmiHydroRaVENS` → `BmiMNiShed`, etc.).
 
 ## Reminder for the fix session
 
